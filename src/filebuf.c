@@ -104,6 +104,22 @@ int filebuf_append_line (FileBuffer *buf, FileLine *line)
     return 0;
 }
 
+int filebuf_replace_line (FileBuffer *buf, FileLine *line, size_t pos)
+{
+    assert(buf != NULL);
+    assert(line != NULL);
+
+    if (buf->num_lines <= pos) {
+        fprintf(stderr,
+                "Can't replace line %lu because it doesn't exist!\n", pos);
+        return 1;
+    }
+
+    fileline_free(buf->lines[pos]);
+    buf->lines[pos] = line;
+    return 0;
+}
+
 int filebuf_load_file (FileBuffer *buf, const char *filename)
 {
     FILE *fp = NULL;

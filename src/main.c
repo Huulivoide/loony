@@ -32,6 +32,13 @@ int main (int argc, char *argv[])
                 FileLine *line = fileline_init(tmp);
                 filebuf_append_line(fbuf, line);
             }
+        } else if (buf[0] == 'c') {
+            size_t pos;
+            char *tmp = &buf[1];
+            if (sscanf(buf, "%*s %lu %s", &pos, tmp) == 2) {
+                FileLine *line = fileline_init(tmp);
+                filebuf_replace_line(fbuf, line, pos-1);
+            }
         } else if (buf[0] == 'l') {
             size_t first, last;
             if (sscanf(buf, "%*s %lu %lu", &first, &last) == 2) {

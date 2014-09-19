@@ -7,6 +7,7 @@
 #include "filebuf.h"
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -99,5 +100,63 @@ int filebuf_append_line (FileBuffer *buf, FileLine *line)
 
     buf->lines[buf->num_lines] = line;
     buf->num_lines += 1;
+    return 0;
+}
+
+int filebuf_load_file (FileBuffer *buf, const char *filename)
+{
+    FILE *fp = NULL;
+    char *line = NULL;
+    size_t n = 0;
+    ssize_t num_chars = 0;
+    size_t i;
+
+    assert(buf != NULL);
+    assert(filename != NULL);
+
+    fp = fopen(filename, "r");
+    if (!fp) {
+        fprintf(stderr, "Couldn't open file %s for reading\n", filename);
+        return 1;
+    }
+
+    for (i = 0; i < buf->num_lines; ++i) {
+        fileline_free(buf->lines[i]);
+    }
+    free(buf->lines);
+    buf->linebuf_size = 0;
+    buf->num_lines = 0;
+
+    while ((num_chars = getline(&line, &n, fp)) != -1) {
+        filebuf_append_line(buf, fileline_init(line));
+        free(line);
+        line = NULL;
+        n = 0;
+    }
+    free(line);
+
+    fclose(fp);
+    return 0;
+}
+
+int filebuf_save_file (FileBuffer *buf, const char *filename)
+{
+    FILE *fp;
+    size_t i;
+
+    assert(buf != NULL);
+    assert(filename != NULL);
+
+    fp = fopen(filename, "w");
+    if (!fp) {
+        fprintf(stderr, "Couldn't open file %s for writing\n", filename);
+        return 1;
+    }
+
+    for (i = 0; i < buf->num_lines; ++i) {
+        fprintf(fp, "%s\n", buf->lines[i]->text);
+    }
+
+    fclose(fp);
     return 0;
 }

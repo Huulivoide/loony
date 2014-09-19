@@ -11,24 +11,6 @@
 
 #include "filebuf.h"
 
-void save_buf (const char *filename, const FileBuffer *buf)
-{
-    FILE *fp;
-    size_t i;
-
-    fp = fopen(filename, "w");
-    if (!fp) {
-        fprintf(stderr, "Couldn't open file %s for writing", filename);
-        return;
-    }
-
-    for (i = 0; i < buf->num_lines; ++i) {
-        fprintf(fp, "%s\n", buf->lines[i]->text);
-    }
-
-    fclose(fp);
-}
-
 int main (int argc, char *argv[])
 {
 #define BUFSIZE 1024
@@ -56,7 +38,9 @@ int main (int argc, char *argv[])
                 printf("%s\n", fbuf->lines[i]->text);
             }
         } else if (buf[0] == 'w') {
-            save_buf(argv[1], fbuf);
+            filebuf_save_file(fbuf, argv[1]);
+        } else if (buf[0] == 'r') {
+            filebuf_load_file(fbuf, argv[1]);
         } else if (buf[0] == 'q') {
             goto end;
         } else {

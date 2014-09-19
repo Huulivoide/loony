@@ -25,3 +25,4 @@
 *.o
 src/Makefile
 src/Makefile.in
+src/loony

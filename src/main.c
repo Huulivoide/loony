@@ -4,30 +4,35 @@
  * This file contains the main() function and other stuff used at startup.
  */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-void save_buf (const char *filename, const char *buf)
+#include "filebuf.h"
+
+void save_buf (const char *filename, const FileBuffer *buf)
 {
-    FILE *fp = fopen(filename, "w");
+    FILE *fp;
+    size_t i;
+
+    fp = fopen(filename, "w");
     if (!fp) {
         fprintf(stderr, "Couldn't open file %s for writing", filename);
         return;
     }
-    while (*buf) {
-        putc(*buf, fp);
-        buf++;
+
+    for (i = 0; i < buf->num_lines; ++i) {
+        fprintf(fp, "%s\n", buf->lines[i]->text);
     }
+
     fclose(fp);
 }
 
 int main (int argc, char *argv[])
 {
 #define BUFSIZE 1024
-    char fbuf[BUFSIZE];
-    memset(fbuf, 0, BUFSIZE);
-    size_t used_fbuf = 1; /* NUL */
+    FileBuffer *fbuf = filebuf_init();
     char buf[BUFSIZE];
 
     if (argc != 2) {
@@ -36,23 +41,30 @@ int main (int argc, char *argv[])
     }
 
     while (fgets(buf, BUFSIZE, stdin)) {
-        switch (buf[0]) {
-            case 'a':
-                strncat(fbuf, buf+1, BUFSIZE-used_fbuf);
-                used_fbuf += strlen(buf+1);
-                break;
-            case 'l':
-                printf("%s", fbuf);
-                break;
-            case 'w':
-                save_buf(argv[1], fbuf);
-                break;
-            case 'q':
-                exit(0);
-                break;
-            default:
-                fprintf(stderr, "Invalid command %c", *buf);
-                break;
+        if (buf[0] == 'a') {
+            char *tmp = &buf[1];
+            while (*tmp && isspace(*tmp)) {
+                tmp++;
+            }
+            if (*tmp) {
+                FileLine *line = fileline_init(tmp);
+                filebuf_append_line(fbuf, line);
+            }
+        } else if (buf[0] == 'l') {
+            size_t i;
+            for (i = 0; i < fbuf->num_lines; ++i) {
+                printf("%s\n", fbuf->lines[i]->text);
+            }
+        } else if (buf[0] == 'w') {
+            save_buf(argv[1], fbuf);
+        } else if (buf[0] == 'q') {
+            goto end;
+        } else {
+            fprintf(stderr, "Invalid command %c\n", buf[0]);
         }
     }
+
+end:
+    filebuf_free(fbuf);
+    return 0;
 }

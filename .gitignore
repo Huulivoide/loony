@@ -1,0 +1,27 @@
+# autotools crap (copied from http://stackoverflow.com/questions/16404066/which-files-of-an-autoconf-project-to-put-into-gitignore)
+/Makefile
+/Makefile.in
+/aclocal.m4
+/autom4te.cache/
+/compile
+/config.*
+/configure
+/depcomp
+/install-sh
+/libtool
+/ltmain.sh
+/m4/
+/missing
+/stamp-h?
+.deps/
+.dirstamp
+.libs/
+*.l[ao]
+*~
+
+# other crap
+*.log
+*.status
+*.o
+src/Makefile
+src/Makefile.in

@@ -33,9 +33,11 @@ int main (int argc, char *argv[])
                 filebuf_append_line(fbuf, line);
             }
         } else if (buf[0] == 'l') {
-            size_t i;
-            for (i = 0; i < fbuf->num_lines; ++i) {
-                printf("%s\n", fbuf->lines[i]->text);
+            size_t first, last;
+            if (sscanf(buf, "%*s %lu %lu", &first, &last) == 2) {
+                filebuf_print(fbuf, first-1, last-1);
+            } else {
+                filebuf_print(fbuf, 0, fbuf->num_lines-1);
             }
         } else if (buf[0] == 'w') {
             filebuf_save_file(fbuf, argv[1]);

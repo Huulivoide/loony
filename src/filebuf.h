@@ -63,3 +63,6 @@ int filebuf_load_file (FileBuffer *buf, const char *filename);
 
 /* Saves a FileBuffer into the given file. Returns 0 on success. */
 int filebuf_save_file (FileBuffer *buf, const char *filename);
+
+/* Prints lines from buf to stdout. Keep in mind that the first line is 0. */
+void filebuf_print (const FileBuffer *buf, size_t first, size_t last);

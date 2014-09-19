@@ -7,6 +7,7 @@
 #include "filebuf.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -159,4 +160,18 @@ int filebuf_save_file (FileBuffer *buf, const char *filename)
 
     fclose(fp);
     return 0;
+}
+
+void filebuf_print (const FileBuffer *buf, size_t first, size_t last)
+{
+    int line_digits;
+
+    assert(buf != NULL);
+    assert(first <= last);
+
+    line_digits = log10(last) + 1;
+
+    for (; first <= last && first < buf->num_lines; ++first) {
+        printf("%*lu %s\n", line_digits, first+1, buf->lines[first]->text);
+    }
 }

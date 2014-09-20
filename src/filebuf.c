@@ -78,6 +78,8 @@ FileBuffer *filebuf_init (void)
     buf->lines = NULL;
     buf->linebuf_size = 0;
     buf->num_lines = 0;
+    buf->crow = 0;
+    buf->ccol = 0;
 
     return buf;
 }

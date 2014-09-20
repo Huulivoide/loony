@@ -9,6 +9,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <curses.h>
+
+#include "cursesio.h"
 #include "filebuf.h"
 
 int main (int argc, char *argv[])
@@ -22,7 +25,29 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    while (fgets(buf, BUFSIZE, stdin)) {
+
+    if (filebuf_load_file(fbuf, argv[1])) {
+        printf("Couldn't load file %s, exiting.\n", argv[1]);
+        return 1;
+    }
+
+    /* start curses */
+    initscr();
+    cbreak();
+    keypad(stdscr, TRUE);
+    noecho();
+
+    for (;;) {
+        int ch;
+
+        display_buf(fbuf);
+
+        ch = getch();
+
+        if (ch == 'q') {
+            goto end;
+        }
+        /*
         if (buf[0] == 'a') {
             char tmp[BUFSIZE];
             if (sscanf(buf, "%*1s%*1[ ]%[^\n]", tmp) == 1) {
@@ -64,9 +89,11 @@ int main (int argc, char *argv[])
         } else {
             fprintf(stderr, "Invalid command %c\n", buf[0]);
         }
+        */
     }
 
 end:
+    endwin();
     filebuf_free(fbuf);
     return 0;
 }

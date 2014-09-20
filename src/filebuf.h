@@ -32,6 +32,8 @@ typedef struct FileBuffer
     size_t linebuf_size;
     /* number of lines in the buffer */
     size_t num_lines;
+    /* cursor location. first row/column is number 0. */
+    int crow, ccol;
 } FileBuffer;
 
 /*

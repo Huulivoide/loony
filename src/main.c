@@ -34,8 +34,8 @@ int main (int argc, char *argv[])
             }
         } else if (buf[0] == 'c') {
             size_t pos;
-            char *tmp = &buf[1];
-            if (sscanf(buf, "%*s %lu %s", &pos, tmp) == 2) {
+            char tmp[BUFSIZE];
+            if (sscanf(buf, "%*s %lu %[^\n]", &pos, tmp) == 2) {
                 FileLine *line = fileline_init(tmp);
                 filebuf_replace_line(fbuf, line, pos-1);
             }

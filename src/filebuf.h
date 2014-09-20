@@ -58,6 +58,12 @@ void filebuf_free (FileBuffer *buf);
 /* Adds a new line at the end of the buffer. Returns 0 on success. */
 int filebuf_append_line (FileBuffer *buf, FileLine *line);
 
+/* Adds a new line after the given line. Returns 0 on success. */
+int filebuf_insert_line (FileBuffer *buf, FileLine *line, size_t pos);
+
+/* Deletes the given line. Returns 0 on success. */
+int filebuf_delete_line (FileBuffer *buf, size_t pos);
+
 /* Replaces a line with a new line. Returns 0 on success. */
 int filebuf_replace_line (FileBuffer *buf, FileLine *line, size_t pos);
 

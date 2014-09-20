@@ -57,6 +57,17 @@ void fileline_free (FileLine *line)
     free(line);
 }
 
+/* Increases the size of a FileBuffer. */
+static void filebuf_grow (FileBuffer *buf)
+{
+    if (buf->linebuf_size == 0) {
+        buf->linebuf_size = 1;
+    } else {
+        buf->linebuf_size *= 2;
+    }
+    buf->lines = realloc(buf->lines, sizeof(FileLine*) * buf->linebuf_size);
+}
+
 FileBuffer *filebuf_init (void)
 {
     FileBuffer *buf = malloc(sizeof(*buf));
@@ -91,16 +102,56 @@ int filebuf_append_line (FileBuffer *buf, FileLine *line)
     assert(line != NULL);
 
     if (buf->num_lines == buf->linebuf_size) {
-        if (buf->linebuf_size == 0) {
-            buf->linebuf_size = 1;
-        } else {
-            buf->linebuf_size *= 2;
-        }
-        buf->lines = realloc(buf->lines, sizeof(FileLine*) * buf->linebuf_size);
+        filebuf_grow(buf);
     }
 
     buf->lines[buf->num_lines] = line;
     buf->num_lines += 1;
+    return 0;
+}
+
+int filebuf_insert_line (FileBuffer *buf, FileLine *line, size_t pos)
+{
+    size_t i;
+
+    assert(buf != NULL);
+    assert(line != NULL);
+
+    if (buf->num_lines <= pos) {
+        fprintf(stderr,
+                "Can't insert after line %lu because it doesn't exist!\n", pos);
+        return 1;
+    }
+
+    if (buf->num_lines == buf->linebuf_size) {
+        filebuf_grow(buf);
+    }
+
+    for (i = buf->num_lines; i > pos+1; --i) {
+        buf->lines[i] = buf->lines[i-1];
+    }
+
+    buf->lines[pos+1] = line;
+    buf->num_lines += 1;
+    return 0;
+}
+
+int filebuf_delete_line (FileBuffer *buf, size_t pos)
+{
+    assert(buf != NULL);
+
+    if (buf->num_lines <= pos) {
+        fprintf(stderr,
+                "Can't delete line %lu because it doesn't exist!\n", pos);
+        return 1;
+    }
+
+    fileline_free(buf->lines[pos]);
+    buf->num_lines -= 1;
+
+    for (; pos < buf->num_lines; ++pos) {
+        buf->lines[pos] = buf->lines[pos+1];
+    }
     return 0;
 }
 

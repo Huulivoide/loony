@@ -50,6 +50,8 @@ int main (int argc, char *argv[])
             filebuf_move_cursor(fbuf, 1, 0);
         } else if (ch == 'k') {
             filebuf_move_cursor(fbuf, -1, 0);
+        } else if (ch == 'o') {
+            write_new_line(fbuf, fbuf->crow);
         }
         /*
         if (buf[0] == 'a') {

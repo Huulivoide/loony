@@ -25,7 +25,7 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    if (!filebuf_load_file(fbuf, argv[1])) {
+    if (filebuf_load_file(fbuf, argv[1])) {
         filebuf_free(fbuf);
         fbuf = filebuf_init();
     }

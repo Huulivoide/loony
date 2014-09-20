@@ -51,7 +51,7 @@ int main (int argc, char *argv[])
         } else if (ch == 'k') {
             filebuf_move_cursor(fbuf, -1, 0);
         } else if (ch == 'o') {
-            write_new_line(fbuf, fbuf->crow);
+            write_new_line(fbuf, fbuf->crow+1);
         }
         /*
         if (buf[0] == 'a') {

@@ -122,9 +122,9 @@ int filebuf_insert_line (FileBuffer *buf, FileLine *line, size_t pos)
     assert(buf != NULL);
     assert(line != NULL);
 
-    if (buf->num_lines <= pos) {
+    if (buf->num_lines < pos) {
         fprintf(stderr,
-                "Can't insert after line %lu because it doesn't exist!\n",
+                "Can't insert before line %lu because it doesn't exist!\n",
                 pos+1);
         return 1;
     }
@@ -133,11 +133,11 @@ int filebuf_insert_line (FileBuffer *buf, FileLine *line, size_t pos)
         filebuf_grow(buf);
     }
 
-    for (i = buf->num_lines; i > pos+1; --i) {
+    for (i = buf->num_lines; i > pos; --i) {
         buf->lines[i] = buf->lines[i-1];
     }
 
-    buf->lines[pos+1] = line;
+    buf->lines[pos] = line;
     buf->num_lines += 1;
     return 0;
 }

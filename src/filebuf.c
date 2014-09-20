@@ -193,6 +193,7 @@ int filebuf_load_file (FileBuffer *buf, const char *filename)
         fileline_free(buf->lines[i]);
     }
     free(buf->lines);
+    buf->lines = NULL;
     buf->linebuf_size = 0;
     buf->num_lines = 0;
 

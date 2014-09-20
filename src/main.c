@@ -25,10 +25,9 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-
-    if (filebuf_load_file(fbuf, argv[1])) {
-        printf("Couldn't load file %s, exiting.\n", argv[1]);
-        return 1;
+    if (!filebuf_load_file(fbuf, argv[1])) {
+        filebuf_free(fbuf);
+        fbuf = filebuf_init();
     }
 
     /* start curses */
@@ -51,10 +50,16 @@ int main (int argc, char *argv[])
         } else if (ch == 'k') {
             filebuf_move_cursor(fbuf, -1, 0);
         } else if (ch == 'o') {
-            write_new_line(fbuf, fbuf->crow+1);
+            if (fbuf->num_lines == 0) {
+                write_new_line(fbuf, fbuf->crow);
+            } else {
+                write_new_line(fbuf, fbuf->crow+1);
+            }
             filebuf_move_cursor(fbuf, 1, 0);
         } else if (ch == 'O') {
             write_new_line(fbuf, fbuf->crow);
+        } else if (ch == 'd') {
+            filebuf_delete_line(fbuf, fbuf->crow);
         }
         /*
         if (buf[0] == 'a') {

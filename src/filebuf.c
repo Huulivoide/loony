@@ -158,6 +158,11 @@ int filebuf_delete_line (FileBuffer *buf, size_t pos)
     for (; pos < buf->num_lines; ++pos) {
         buf->lines[pos] = buf->lines[pos+1];
     }
+
+    if (buf->crow == buf->num_lines) {
+        filebuf_move_cursor(buf, -1, 0);
+    }
+
     return 0;
 }
 
@@ -262,6 +267,10 @@ void filebuf_move_cursor (FileBuffer *buf, int dy, int dx)
     }
 
     assert(buf != NULL);
+
+    if (buf->num_lines == 0) {
+        return;
+    }
 
     getmaxyx(stdscr, win_h, win_w);
 

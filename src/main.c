@@ -59,7 +59,9 @@ int main (int argc, char *argv[])
         } else if (ch == 'O') {
             write_new_line(fbuf, fbuf->crow);
         } else if (ch == 'd') {
-            filebuf_delete_line(fbuf, fbuf->crow);
+            if (fbuf->num_lines != 0) {
+                filebuf_delete_line(fbuf, fbuf->crow);
+            }
         }
         /*
         if (buf[0] == 'a') {

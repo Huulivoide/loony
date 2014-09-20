@@ -36,6 +36,8 @@ typedef struct FileBuffer
     int crow, ccol;
     /* first row displayed on screen */
     int firstrow;
+    /* non-zero if the screen should be completely redrawn */
+    int redraw_needed;
 } FileBuffer;
 
 /*

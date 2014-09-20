@@ -9,13 +9,18 @@
 #include <assert.h>
 #include <math.h>
 
-void display_buf (const FileBuffer *buf)
+void display_buf (FileBuffer *buf)
 {
     size_t win_h, win_w; /* window size */
     int line_digits; /* how much space required for line numbers? */
     size_t i;
 
     assert(buf != NULL);
+
+    if (buf->redraw_needed) {
+        clear();
+        buf->redraw_needed = 0;
+    }
 
     getmaxyx(stdscr, win_h, win_w);
 

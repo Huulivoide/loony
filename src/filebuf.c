@@ -83,6 +83,7 @@ FileBuffer *filebuf_init (void)
     buf->crow = 0;
     buf->ccol = 0;
     buf->firstrow = 0;
+    buf->redraw_needed = 0;
 
     return buf;
 }
@@ -163,6 +164,7 @@ int filebuf_delete_line (FileBuffer *buf, size_t pos)
         filebuf_move_cursor(buf, -1, 0);
     }
 
+    buf->redraw_needed = 1;
     return 0;
 }
 

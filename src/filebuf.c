@@ -236,7 +236,6 @@ void filebuf_print (const FileBuffer *buf, size_t first, size_t last)
     int line_digits;
 
     assert(buf != NULL);
-    assert(first <= last);
 
     if (last == 0) {
         line_digits = 1;

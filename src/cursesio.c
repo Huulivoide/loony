@@ -71,5 +71,4 @@ void write_new_line (FileBuffer *buf, size_t pos)
     getnstr(tmp, BUFSIZE-1);
     noecho();
     filebuf_insert_line(buf, fileline_init(tmp), pos);
-    filebuf_move_cursor(buf, 1, 0);
 }

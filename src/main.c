@@ -24,18 +24,15 @@ int main (int argc, char *argv[])
 
     while (fgets(buf, BUFSIZE, stdin)) {
         if (buf[0] == 'a') {
-            char *tmp = &buf[1];
-            while (*tmp && isspace(*tmp)) {
-                tmp++;
-            }
-            if (*tmp) {
+            char tmp[BUFSIZE];
+            if (sscanf(buf, "%*1s%*1[ ]%[^\n]", tmp) == 1) {
                 FileLine *line = fileline_init(tmp);
                 filebuf_append_line(fbuf, line);
             }
         } else if (buf[0] == 'i') {
             size_t pos;
             char tmp[BUFSIZE];
-            if (sscanf(buf, "%*s %lu %[^\n]", &pos, tmp) == 2) {
+            if (sscanf(buf, "%*s %lu%*1[ ]%[^\n]", &pos, tmp) == 2) {
                 FileLine *line = fileline_init(tmp);
                 filebuf_insert_line(fbuf, line, pos-1);
             }
@@ -47,7 +44,7 @@ int main (int argc, char *argv[])
         } else if (buf[0] == 'c') {
             size_t pos;
             char tmp[BUFSIZE];
-            if (sscanf(buf, "%*s %lu %[^\n]", &pos, tmp) == 2) {
+            if (sscanf(buf, "%*s %lu%*1[ ]%[^\n]", &pos, tmp) == 2) {
                 FileLine *line = fileline_init(tmp);
                 filebuf_replace_line(fbuf, line, pos-1);
             }

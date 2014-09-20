@@ -46,6 +46,10 @@ int main (int argc, char *argv[])
 
         if (ch == 'q') {
             goto end;
+        } else if (ch == 'j') {
+            filebuf_move_cursor(fbuf, 1, 0);
+        } else if (ch == 'k') {
+            filebuf_move_cursor(fbuf, -1, 0);
         }
         /*
         if (buf[0] == 'a') {

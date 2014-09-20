@@ -21,10 +21,13 @@ void display_buf (const FileBuffer *buf)
 
     line_digits = buf->num_lines == 0 ? 1 : log10(buf->num_lines) + 1;
 
-    for (i = 0; i < win_h && buf->crow + i < buf->num_lines; ++i) {
-        size_t row = buf->crow + i;
-        mvprintw(row, 0,
+    for (i = 0; i < win_h && buf->firstrow + i < buf->num_lines; ++i) {
+        size_t row = buf->firstrow + i;
+        move(i, 0);
+        clrtoeol();
+        mvprintw(i, 0,
                 "%*lu %s\n", line_digits, row+1, buf->lines[row]->text);
     }
+    move(buf->crow - buf->firstrow, buf->ccol + line_digits + 1);
     refresh();
 }

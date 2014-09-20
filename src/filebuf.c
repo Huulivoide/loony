@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <curses.h>
+
 FileLine *fileline_init (const char *text)
 {
     FileLine *line;
@@ -80,6 +82,7 @@ FileBuffer *filebuf_init (void)
     buf->num_lines = 0;
     buf->crow = 0;
     buf->ccol = 0;
+    buf->firstrow = 0;
 
     return buf;
 }
@@ -247,5 +250,40 @@ void filebuf_print (const FileBuffer *buf, size_t first, size_t last)
 
     for (; first <= last && first < buf->num_lines; ++first) {
         printf("%*lu %s\n", line_digits, first+1, buf->lines[first]->text);
+    }
+}
+
+void filebuf_move_cursor (FileBuffer *buf, int dy, int dx)
+{
+    size_t win_h, win_w;
+
+    if (dx == 0 && dy == 0) {
+        return;
+    }
+
+    assert(buf != NULL);
+
+    getmaxyx(stdscr, win_h, win_w);
+
+    buf->crow += dy;
+    buf->ccol += dx;
+
+    if (buf->crow < 0) {
+        buf->crow = 0;
+    } else if (buf->crow >= buf->num_lines) {
+        buf->crow = buf->num_lines - 1;
+    }
+
+    if (buf->ccol < 0) {
+        buf->ccol = 0;
+    } else if (buf->ccol > buf->lines[buf->crow]->num_chars) {
+        buf->ccol = buf->lines[buf->crow]->num_chars;
+    }
+
+    /* scrolling required? */
+    if (buf->crow < buf->firstrow) {
+        buf->firstrow = buf->crow;
+    } else if (buf->crow >= buf->firstrow + win_h) {
+        buf->firstrow = buf->crow - win_h + 1;
     }
 }

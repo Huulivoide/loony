@@ -34,6 +34,8 @@ typedef struct FileBuffer
     size_t num_lines;
     /* cursor location. first row/column is number 0. */
     int crow, ccol;
+    /* first row displayed on screen */
+    int firstrow;
 } FileBuffer;
 
 /*
@@ -77,3 +79,6 @@ int filebuf_save_file (FileBuffer *buf, const char *filename);
 
 /* Prints lines from buf to stdout. Keep in mind that the first line is 0. */
 void filebuf_print (const FileBuffer *buf, size_t first, size_t last);
+
+/* Moves cursor dy rows down and dx columns to the right. */
+void filebuf_move_cursor (FileBuffer *buf, int dy, int dx);

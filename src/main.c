@@ -45,6 +45,8 @@ int main (int argc, char *argv[])
 
         if (ch == 'q') {
             goto end;
+        } else if (ch == 'w') {
+            filebuf_save_file(fbuf, argv[1]);
         } else if (ch == 'h') {
             filebuf_move_cursor(fbuf, 0, -1);
         } else if (ch == 'l') {

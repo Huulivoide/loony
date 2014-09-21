@@ -18,7 +18,6 @@ int main (int argc, char *argv[])
 {
 #define BUFSIZE 1024
     FileBuffer *fbuf = filebuf_init();
-    char buf[BUFSIZE];
 
     if (argc != 2) {
         printf("Loony must be launched with 'loony filename'\n");
@@ -69,49 +68,6 @@ int main (int argc, char *argv[])
                 filebuf_delete_line(fbuf, fbuf->crow);
             }
         }
-        /*
-        if (buf[0] == 'a') {
-            char tmp[BUFSIZE];
-            if (sscanf(buf, "%*1s%*1[ ]%[^\n]", tmp) == 1) {
-                FileLine *line = fileline_init(tmp);
-                filebuf_append_line(fbuf, line);
-            }
-        } else if (buf[0] == 'i') {
-            size_t pos;
-            char tmp[BUFSIZE];
-            if (sscanf(buf, "%*s %lu%*1[ ]%[^\n]", &pos, tmp) == 2) {
-                FileLine *line = fileline_init(tmp);
-                filebuf_insert_line(fbuf, line, pos-1);
-            }
-        } else if (buf[0] == 'd') {
-            size_t pos;
-            if (sscanf(buf, "%*s %lu", &pos) == 1) {
-                filebuf_delete_line(fbuf, pos-1);
-            }
-        } else if (buf[0] == 'c') {
-            size_t pos;
-            char tmp[BUFSIZE];
-            if (sscanf(buf, "%*s %lu%*1[ ]%[^\n]", &pos, tmp) == 2) {
-                FileLine *line = fileline_init(tmp);
-                filebuf_replace_line(fbuf, line, pos-1);
-            }
-        } else if (buf[0] == 'l') {
-            size_t first, last;
-            if (sscanf(buf, "%*s %lu %lu", &first, &last) == 2) {
-                filebuf_print(fbuf, first-1, last-1);
-            } else {
-                filebuf_print(fbuf, 0, fbuf->num_lines-1);
-            }
-        } else if (buf[0] == 'w') {
-            filebuf_save_file(fbuf, argv[1]);
-        } else if (buf[0] == 'r') {
-            filebuf_load_file(fbuf, argv[1]);
-        } else if (buf[0] == 'q') {
-            goto end;
-        } else {
-            fprintf(stderr, "Invalid command %c\n", buf[0]);
-        }
-        */
     }
 
 end:

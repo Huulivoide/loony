@@ -14,6 +14,8 @@
 
 #include <curses.h>
 
+#include "util.h"
+
 FileLine *fileline_init (const char *text)
 {
     FileLine *line;
@@ -28,7 +30,7 @@ FileLine *fileline_init (const char *text)
         return NULL;
     }
 
-    num_chars = strlen(text);
+    num_chars = u8strlen(text);
     buf_size = 16;
     while (buf_size < num_chars+1) {
         buf_size *= 2;

@@ -5,6 +5,7 @@
  */
 
 #include <ctype.h>
+#include <locale.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -28,6 +29,9 @@ int main (int argc, char *argv[])
         filebuf_free(fbuf);
         fbuf = filebuf_init();
     }
+
+    /* set the (hopefully) correct locale */
+    setlocale(LC_ALL, "");
 
     /* start curses */
     initscr();

@@ -243,23 +243,6 @@ int filebuf_save_file (FileBuffer *buf, const char *filename)
     return 0;
 }
 
-void filebuf_print (const FileBuffer *buf, size_t first, size_t last)
-{
-    int line_digits;
-
-    assert(buf != NULL);
-
-    if (last == 0) {
-        line_digits = 1;
-    } else  {
-        line_digits = log10(last) + 1;
-    }
-
-    for (; first <= last && first < buf->num_lines; ++first) {
-        printf("%*lu %s\n", line_digits, first+1, buf->lines[first]->text);
-    }
-}
-
 void filebuf_move_cursor (FileBuffer *buf, int dy, int dx)
 {
     size_t win_h, win_w;

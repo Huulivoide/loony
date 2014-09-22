@@ -31,7 +31,7 @@ void display_buf (FileBuffer *buf)
         move(i, 0);
         clrtoeol();
         mvprintw(i, 0,
-                "%*lu %s\n", line_digits, row+1, buf->lines[row]->text);
+                "%*zu %s\n", line_digits, row+1, buf->lines[row]->text);
     }
     move(buf->crow - buf->firstrow, buf->ccol + line_digits + 1);
     refresh();
@@ -65,12 +65,12 @@ void write_new_line (FileBuffer *buf, size_t pos)
             continue;
         }
         mvprintw(i, 0,
-                "%*lu %s\n", line_digits, row+1+past_new_line,
+                "%*zu %s\n", line_digits, row+1+past_new_line,
                 buf->lines[row]->text);
     }
     move(pos-buf->firstrow-scroll_one_line, 0);
     clrtoeol();
-    mvprintw(pos-buf->firstrow-scroll_one_line, 0, "%*lu ", line_digits, pos+1);
+    mvprintw(pos-buf->firstrow-scroll_one_line, 0, "%*zu ", line_digits, pos+1);
     refresh();
     echo();
     getnstr(tmp, BUFSIZE-1);

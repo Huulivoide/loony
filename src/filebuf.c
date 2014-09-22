@@ -125,7 +125,7 @@ int filebuf_insert_line (FileBuffer *buf, FileLine *line, size_t pos)
 
     if (buf->num_lines < pos) {
         fprintf(stderr,
-                "Can't insert before line %lu because it doesn't exist!\n",
+                "Can't insert before line %zu because it doesn't exist!\n",
                 pos+1);
         return 1;
     }
@@ -149,7 +149,7 @@ int filebuf_delete_line (FileBuffer *buf, size_t pos)
 
     if (buf->num_lines <= pos) {
         fprintf(stderr,
-                "Can't delete line %lu because it doesn't exist!\n", pos+1);
+                "Can't delete line %zu because it doesn't exist!\n", pos+1);
         return 1;
     }
 
@@ -175,7 +175,7 @@ int filebuf_replace_line (FileBuffer *buf, FileLine *line, size_t pos)
 
     if (buf->num_lines <= pos) {
         fprintf(stderr,
-                "Can't replace line %lu because it doesn't exist!\n", pos+1);
+                "Can't replace line %zu because it doesn't exist!\n", pos+1);
         return 1;
     }
 

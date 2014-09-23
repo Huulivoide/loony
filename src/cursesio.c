@@ -52,7 +52,7 @@ void write_new_line (FileBuffer *buf, size_t pos)
     getmaxyx(stdscr, win_h, win_w);
 
     line_digits = buf->num_lines == 0 ? 1 : log10(buf->num_lines) + 1;
-    scroll_one_line = pos == buf->num_lines && win_h < buf->num_lines;
+    scroll_one_line = pos == buf->num_lines && win_h <= buf->num_lines;
 
     for (i = 0;
          i < win_h - scroll_one_line && buf->firstrow + i < buf->num_lines;

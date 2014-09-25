@@ -62,6 +62,36 @@ void fileline_free (FileLine *line)
     free(line);
 }
 
+int fileline_insert (FileLine *line, const char *text, size_t pos)
+{
+    size_t num_bytes = strlen(text);
+    size_t new_size = line->num_bytes + num_bytes + 1;
+    size_t u8pos;
+    char *tmp;
+
+    if (u8_find_pos(line->text, pos, &u8pos)) {
+        return 1;
+    }
+
+    tmp = malloc(line->num_bytes - u8pos + 1);
+
+    if (line->textbuf_size < new_size) {
+        while (line->textbuf_size < new_size) {
+            line->textbuf_size *= 2;
+        }
+        line->text = realloc(line->text, line->textbuf_size);
+    }
+
+    strcpy(tmp, line->text + u8pos);
+    strcpy(line->text + u8pos, text);
+    strcat(line->text, tmp);
+    free(tmp);
+    line->num_bytes = new_size - 1; /* don't count the '\0' */
+    line->num_chars = u8strlen(line->text);
+
+    return 0;
+}
+
 /* Increases the size of a FileBuffer. */
 static void filebuf_grow (FileBuffer *buf)
 {

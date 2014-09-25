@@ -54,6 +54,9 @@ FileLine *fileline_init (const char *text);
 /* Destroys a FileLine. */
 void fileline_free (FileLine *line);
 
+/* Inserts text in a FileLine. Returns 0 on success. */
+int fileline_insert (FileLine *line, const char *text, size_t pos);
+
 /*
  * FileBuffer functions
  */

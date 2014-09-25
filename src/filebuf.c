@@ -19,7 +19,7 @@
 FileLine *fileline_init (const char *text)
 {
     FileLine *line;
-    size_t num_chars;
+    size_t num_bytes;
     size_t buf_size;
     char *newline;
 
@@ -30,9 +30,9 @@ FileLine *fileline_init (const char *text)
         return NULL;
     }
 
-    num_chars = u8strlen(text);
+    num_bytes = strlen(text);
     buf_size = 16;
-    while (buf_size < num_chars+1) {
+    while (buf_size < num_bytes+1) {
         buf_size *= 2;
     }
 
@@ -47,7 +47,8 @@ FileLine *fileline_init (const char *text)
         *newline = '\0';
     }
     line->textbuf_size = buf_size;
-    line->num_chars = num_chars;
+    line->num_chars = strlen(text);
+    line->num_bytes = num_bytes;
     return line;
 }
 

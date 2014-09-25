@@ -19,6 +19,9 @@ typedef struct FileLine
     size_t textbuf_size;
     /* number of characters in the text array */
     size_t num_chars;
+    /* number of bytes in the text array (remember that UTF-8 characters can be
+     * more than one byte */
+    size_t num_bytes;
 } FileLine;
 
 /*

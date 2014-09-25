@@ -47,7 +47,7 @@ FileLine *fileline_init (const char *text)
         *newline = '\0';
     }
     line->textbuf_size = buf_size;
-    line->num_chars = strlen(text);
+    line->num_chars = u8strlen(text);
     line->num_bytes = num_bytes;
     return line;
 }

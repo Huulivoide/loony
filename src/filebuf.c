@@ -213,6 +213,10 @@ int filebuf_load_file (FileBuffer *buf, const char *filename)
     buf->num_lines = 0;
 
     while ((num_chars = getline(&line, &n, fp)) != -1) {
+        char *newline;
+        if ((newline = strchr(line, '\n'))) {
+            *newline = '\0';
+        }
         filebuf_append_line(buf, fileline_init(line));
         free(line);
         line = NULL;

@@ -17,7 +17,7 @@ size_t u8strlen (const char *s)
 {
     size_t n = 0;
     for (; *s; ++s) {
-        n += (*s & 0xc0) != 0x80;
+        n += is_u8_start_byte(*s);
     }
     return n;
 }
@@ -32,7 +32,7 @@ int u8_find_pos(const char *s, size_t n, size_t *pos)
         return 0;
     }
     for (; *s; ++s) {
-        *pos += (*s & 0xc0) != 0x80;
+        *pos += is_u8_start_byte(*s);
         if (*pos == n) {
             return 0;
         }

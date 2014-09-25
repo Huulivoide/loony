@@ -84,3 +84,6 @@ int filebuf_save_file (FileBuffer *buf, const char *filename);
 
 /* Moves cursor dy rows down and dx columns to the right. */
 void filebuf_move_cursor (FileBuffer *buf, int dy, int dx);
+
+/* Deletes the character under the cursor. Returns 0 on success. */
+int filebuf_delete_char (FileBuffer *buf);

@@ -288,3 +288,38 @@ void filebuf_move_cursor (FileBuffer *buf, int dy, int dx)
         buf->firstrow = buf->crow - win_h + 1;
     }
 }
+
+int filebuf_delete_char (FileBuffer *buf)
+{
+    /* First byte that should be deleted. Remember, UTF-8 characters can be
+     * more than one byte! */
+    size_t first_to_delete;
+    /* How many bytes were deleted? */
+    size_t deleted_bytes = 1;
+    char *s;
+
+    assert(buf != NULL);
+
+    if (buf->ccol >= buf->lines[buf->crow]->num_chars) {
+        return 0; /* cursor is one character past the end of the line */
+    }
+
+    if (u8_find_pos(buf->lines[buf->crow]->text, buf->ccol, &first_to_delete)) {
+        fprintf(stderr, "Can't find pos %d in buf\n", buf->ccol);
+        return 1;
+    }
+    
+    s = buf->lines[buf->crow]->text + first_to_delete + 1;
+    for (; !is_u8_start_byte(*s); ++s) {
+        deleted_bytes++;
+    }
+    s -= deleted_bytes;
+    for (; s[deleted_bytes]; ++s) {
+        *s = s[deleted_bytes];
+    }
+    *s = '\0';
+
+    buf->lines[buf->crow]->num_bytes -= deleted_bytes;
+    buf->lines[buf->crow]->num_chars -= 1;
+    return 0;
+}

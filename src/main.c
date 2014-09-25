@@ -71,6 +71,10 @@ int main (int argc, char *argv[])
             if (fbuf->num_lines != 0) {
                 filebuf_delete_line(fbuf, fbuf->crow);
             }
+        } else if (ch == 'x') {
+            if (fbuf->num_lines != 0) {
+                filebuf_delete_char(fbuf);
+            }
         }
     }
 

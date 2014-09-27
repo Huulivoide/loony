@@ -58,6 +58,8 @@ int main (int argc, char *argv[])
             filebuf_move_cursor(fbuf, 1, 0);
         } else if (ch == 'k') {
             filebuf_move_cursor(fbuf, -1, 0);
+        } else if (ch == 'i') {
+            insert_at_cursor(fbuf);
         } else if (ch == 'o') {
             if (fbuf->num_lines == 0) {
                 write_new_line(fbuf, fbuf->crow);

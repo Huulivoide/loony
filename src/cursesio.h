@@ -15,3 +15,6 @@ void display_buf (FileBuffer *buf);
 
 /* Allows the user to add a new line in the given position. */
 void write_new_line (FileBuffer *buf, size_t pos);
+
+/* Inserts more text at the cursor. */
+void insert_at_cursor(FileBuffer *buf);

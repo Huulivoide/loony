@@ -9,6 +9,10 @@
 #include <assert.h>
 #include <math.h>
 
+#include "util.h"
+
+#define BUFSIZE 1024
+
 void display_buf (FileBuffer *buf)
 {
     size_t win_h, win_w; /* window size */
@@ -39,7 +43,6 @@ void display_buf (FileBuffer *buf)
 
 void write_new_line (FileBuffer *buf, size_t pos)
 {
-#define BUFSIZE 1024
     size_t win_h, win_w;
     int line_digits;
     size_t i;
@@ -76,4 +79,56 @@ void write_new_line (FileBuffer *buf, size_t pos)
     getnstr(tmp, BUFSIZE-1);
     noecho();
     filebuf_insert_line(buf, fileline_init(tmp), pos);
+}
+
+void insert_at_cursor (FileBuffer *buf)
+{
+    int line_digits;
+    char tmp[BUFSIZE];
+    size_t tmp_bytes = 0;
+    size_t u8pos;
+    int c;
+
+    assert(buf != NULL);
+
+    display_buf(buf);
+
+    line_digits = buf->num_lines == 0 ? 1 : log10(buf->num_lines) + 1;
+    tmp[0] = '\0';
+    if (u8_find_pos(buf->lines[buf->crow]->text, buf->ccol, &u8pos)) {
+        return;
+    }
+
+    while ((c = getch()) != 27) { /* 27 = escape */
+        size_t row = buf->crow - buf->firstrow;
+        size_t i;
+
+        if (c == KEY_BACKSPACE) {
+            for (;;) {
+                int end = is_u8_start_byte(tmp[tmp_bytes-1]);
+                tmp[tmp_bytes-1] = '\0';
+                tmp_bytes--;
+                if (end) {
+                    break;
+                }
+            }
+        } else if (tmp_bytes < BUFSIZE -1) {
+            tmp[tmp_bytes] = c;
+            tmp[tmp_bytes+1] = '\0';
+            tmp_bytes++;
+        }
+
+        move(row, line_digits+1);
+        clrtoeol();
+        for (i = 0; i < u8pos; ++i) {
+            addch(buf->lines[buf->crow]->text[i]);
+        }
+        addstr(tmp);
+        for (i = u8pos; i < buf->lines[buf->crow]->num_bytes; ++i) {
+            addch(buf->lines[buf->crow]->text[i]);
+        }
+        move(row, u8pos + u8strlen(tmp) + line_digits + 1);
+    }
+
+    fileline_insert(buf->lines[buf->crow], tmp, buf->ccol);
 }

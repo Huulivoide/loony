@@ -131,4 +131,5 @@ void insert_at_cursor (FileBuffer *buf)
     }
 
     fileline_insert(buf->lines[buf->crow], tmp, buf->ccol);
+    buf->ccol = u8pos + u8strlen(tmp);
 }

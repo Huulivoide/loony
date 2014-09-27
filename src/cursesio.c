@@ -103,12 +103,16 @@ void insert_at_cursor (FileBuffer *buf)
         size_t row = buf->crow - buf->firstrow;
         size_t i;
 
-        if (c == KEY_BACKSPACE && tmp_bytes > 0) {
+        if (c == KEY_BACKSPACE) {
+            if (tmp_bytes == 0) {
+                continue;
+            }
+
             for (;;) {
                 int end = is_u8_start_byte(tmp[tmp_bytes-1]);
                 tmp[tmp_bytes-1] = '\0';
                 tmp_bytes--;
-                if (end) {
+                if (end || tmp_bytes == 0) {
                     break;
                 }
             }

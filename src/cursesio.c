@@ -13,6 +13,36 @@
 
 #define BUFSIZE 1024
 
+/* Reads a complete UTF-8 character to buf with getch().
+ * buf must be at least 5 bytes (UTF-8 characters can be up to four bytes
+ * and the character will be null terminated).
+ * If the character is a backspace or some other special character, that
+ * character is returned.
+ * Returns -1 on error. */
+static int read_u8_char(char *buf)
+{
+    int c = getch();
+    int num_bytes;
+    int i;
+
+    if (c == KEY_BACKSPACE) {
+        return c;
+    }
+
+    num_bytes = u8_char_length(c);
+    if (num_bytes == -1) {
+        fprintf(stderr, "read a byte %d that's not a utf-8 start byte\n", c);
+        return -1;
+    }
+
+    buf[0] = c;
+    buf[num_bytes] = '\0';
+    for (i = 1; i < num_bytes; ++i) {
+        buf[i] = getch();
+    }
+    return 0;
+}
+
 void display_buf (FileBuffer *buf)
 {
     size_t win_h, win_w; /* window size */
@@ -81,59 +111,27 @@ void write_new_line (FileBuffer *buf, size_t pos)
     filebuf_insert_line(buf, fileline_init(tmp), pos);
 }
 
-void insert_at_cursor (FileBuffer *buf)
+void insert_at_cursor(FileBuffer *buf)
 {
-    int line_digits;
-    char tmp[BUFSIZE];
-    size_t tmp_bytes = 0;
-    size_t u8pos;
+    char tmp[5];
     int c;
-
-    assert(buf != NULL);
 
     display_buf(buf);
 
-    line_digits = buf->num_lines == 0 ? 1 : log10(buf->num_lines) + 1;
-    tmp[0] = '\0';
-    if (u8_find_pos(buf->lines[buf->crow]->text, buf->ccol, &u8pos)) {
-        return;
-    }
-
-    while ((c = getch()) != 27) { /* 27 = escape */
-        size_t row = buf->crow - buf->firstrow;
-        size_t i;
-
-        if (c == KEY_BACKSPACE) {
-            if (tmp_bytes == 0) {
-                continue;
+    while ((c = read_u8_char(tmp)) != -1) {
+        if (tmp[0] == 27) { /* 27 = escape */
+            return;
+        } else if (c == KEY_BACKSPACE) {
+            if (buf->ccol > 0) {
+                (buf->ccol)--;
+                filebuf_delete_char(buf);
             }
-
-            for (;;) {
-                int end = is_u8_start_byte(tmp[tmp_bytes-1]);
-                tmp[tmp_bytes-1] = '\0';
-                tmp_bytes--;
-                if (end || tmp_bytes == 0) {
-                    break;
-                }
-            }
-        } else if (tmp_bytes < BUFSIZE -1) {
-            tmp[tmp_bytes] = c;
-            tmp[tmp_bytes+1] = '\0';
-            tmp_bytes++;
+            goto end_loop;
         }
 
-        move(row, line_digits+1);
-        clrtoeol();
-        for (i = 0; i < u8pos; ++i) {
-            addch(buf->lines[buf->crow]->text[i]);
-        }
-        addstr(tmp);
-        for (i = u8pos; i < buf->lines[buf->crow]->num_bytes; ++i) {
-            addch(buf->lines[buf->crow]->text[i]);
-        }
-        move(row, u8pos + u8strlen(tmp) + line_digits + 1);
+        fileline_insert(buf->lines[buf->crow], tmp, buf->ccol);
+        (buf->ccol)++;
+end_loop:
+        display_buf(buf);
     }
-
-    fileline_insert(buf->lines[buf->crow], tmp, buf->ccol);
-    buf->ccol = u8pos + u8strlen(tmp);
 }

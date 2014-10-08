@@ -66,7 +66,6 @@ int main (int argc, char *argv[])
             } else {
                 write_new_line(fbuf, fbuf->crow+1);
             }
-            filebuf_move_cursor(fbuf, 1, 0);
         } else if (ch == 'O') {
             write_new_line(fbuf, fbuf->crow);
         } else if (ch == 'd') {

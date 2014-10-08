@@ -217,6 +217,22 @@ int filebuf_replace_line (FileBuffer *buf, FileLine *line, size_t pos)
     return 0;
 }
 
+int filebuf_join_with_next_line(FileBuffer *buf, size_t pos)
+{
+    int old_num_chars;
+    if (pos >= (buf->num_lines - 1)) {
+        return 1;
+    }
+
+    old_num_chars = buf->lines[pos]->num_chars;
+    fileline_insert(buf->lines[pos], buf->lines[pos+1]->text,
+                    buf->lines[pos]->num_chars);
+    filebuf_delete_line(buf, pos+1);
+    buf->crow = pos;
+    buf->ccol = old_num_chars;
+    return 0;
+}
+
 int filebuf_load_file (FileBuffer *buf, const char *filename)
 {
     FILE *fp = NULL;

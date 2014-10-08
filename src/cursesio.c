@@ -125,6 +125,9 @@ void insert_at_cursor(FileBuffer *buf)
             if (buf->ccol > 0) {
                 (buf->ccol)--;
                 filebuf_delete_char(buf);
+            } else if (buf->crow > 0) {
+                filebuf_join_with_next_line(buf, buf->crow-1);
+                goto end_loop;
             }
             goto end_loop;
         }

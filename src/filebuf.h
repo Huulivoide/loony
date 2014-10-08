@@ -79,6 +79,9 @@ int filebuf_delete_line (FileBuffer *buf, size_t pos);
 /* Replaces a line with a new line. Returns 0 on success. */
 int filebuf_replace_line (FileBuffer *buf, FileLine *line, size_t pos);
 
+/* Join a line with the following line. Returns 0 on success. */
+int filebuf_join_with_next_line(FileBuffer *buf, size_t line);
+
 /* Loads the given file into a FileBuffer. Returns 0 on success. */
 int filebuf_load_file (FileBuffer *buf, const char *filename);
 

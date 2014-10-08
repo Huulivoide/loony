@@ -63,9 +63,9 @@ int u8_find_pos(const char *s, size_t n, size_t *pos)
     if (n == 0) {
         return 0;
     }
-    for (; *s; ++s) {
-        *pos += is_u8_start_byte(*s);
-        if (*pos == n) {
+    for ((*pos) = 1; s[*pos] != '\0'; ++(*pos)) {
+        n -= is_u8_start_byte(s[*pos]);
+        if (n == 0) {
             return 0;
         }
     }

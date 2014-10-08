@@ -69,6 +69,17 @@ int fileline_insert (FileLine *line, const char *text, size_t pos)
     size_t u8pos;
     char *tmp;
 
+    if (pos == line->num_chars) {
+        if (line->textbuf_size < new_size) {
+            while (line->textbuf_size < new_size) {
+                line->textbuf_size *= 2;
+            }
+            line->text = realloc(line->text, line->textbuf_size);
+        }
+        strcat(line->text, text);
+        goto update_size;
+    }
+
     if (u8_find_pos(line->text, pos, &u8pos)) {
         return 1;
     }
@@ -86,6 +97,7 @@ int fileline_insert (FileLine *line, const char *text, size_t pos)
     strcpy(line->text + u8pos, text);
     strcat(line->text, tmp);
     free(tmp);
+update_size:
     line->num_bytes = new_size - 1; /* don't count the '\0' */
     line->num_chars = u8strlen(line->text);
 

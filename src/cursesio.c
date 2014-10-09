@@ -45,11 +45,6 @@ void display_buf (FileBuffer *buf)
 
     assert(buf != NULL);
 
-    if (buf->redraw_needed) {
-        clear();
-        buf->redraw_needed = 0;
-    }
-
     getmaxyx(stdscr, win_h, win_w);
 
     line_digits = buf->num_lines == 0 ? 1 : log10(buf->num_lines) + 1;

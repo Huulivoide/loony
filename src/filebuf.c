@@ -7,6 +7,7 @@
 #include "filebuf.h"
 
 #include <assert.h>
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -366,8 +367,21 @@ void filebuf_move_cursor (FileBuffer *buf, int dy, int dx)
 
     getmaxyx(stdscr, win_h, win_w);
 
-    buf->crow += dy;
-    buf->ccol += dx;
+    if (dy == INT_MIN) {
+        buf->crow = 0;
+    } else if (dy == INT_MAX) {
+        buf->crow = buf->num_lines-1;
+    } else {
+        buf->crow += dy;
+    }
+
+    if (dx == INT_MIN) {
+        buf->ccol = 0;
+    } else if (dx == INT_MAX) {
+        buf->ccol = buf->lines[buf->crow]->num_chars;
+    } else {
+        buf->ccol += dx;
+    }
 
     if (buf->crow < 0) {
         buf->crow = 0;

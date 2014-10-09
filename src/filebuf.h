@@ -95,7 +95,9 @@ int filebuf_load_file (FileBuffer *buf, const char *filename);
 /* Saves a FileBuffer into the given file. Returns 0 on success. */
 int filebuf_save_file (FileBuffer *buf, const char *filename);
 
-/* Moves cursor dy rows down and dx columns to the right. */
+/* Moves cursor dy rows down and dx columns to the right.
+ * INT_MIN moves the cursor to the first line or column;
+ * INT_MAX moves the cursor to the last line or column. */
 void filebuf_move_cursor (FileBuffer *buf, int dy, int dx);
 
 /* Deletes the character under the cursor. Returns 0 on success. */

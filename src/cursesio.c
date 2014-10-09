@@ -89,7 +89,7 @@ void insert_at_cursor(FileBuffer *buf)
         char tmp[5];
         if (c == KEY_BACKSPACE) {
             if (buf->ccol > 0) {
-                (buf->ccol)--;
+                filebuf_move_cursor(buf, 0, -1);
                 filebuf_delete_char(buf);
             } else if (buf->crow > 0) {
                 filebuf_join_with_next_line(buf, buf->crow-1);
@@ -105,7 +105,7 @@ void insert_at_cursor(FileBuffer *buf)
         }
 
         fileline_insert(buf->lines[buf->crow], tmp, buf->ccol);
-        (buf->ccol)++;
+        filebuf_move_cursor(buf, 0, 1);
 end_loop:
         display_buf(buf);
     }

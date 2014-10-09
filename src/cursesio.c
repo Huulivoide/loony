@@ -7,6 +7,7 @@
 #include "cursesio.h"
 
 #include <assert.h>
+#include <limits.h>
 #include <math.h>
 
 #include "util.h"
@@ -69,8 +70,7 @@ void write_new_line (FileBuffer *buf, size_t pos)
     }
 
     filebuf_insert_line(buf, fileline_init(""), pos);
-    buf->crow = pos;
-    buf->ccol = 0;
+    filebuf_move_cursor(buf, pos - buf->crow, INT_MIN);
     insert_at_cursor(buf);
 }
 
@@ -92,8 +92,7 @@ void insert_at_cursor(FileBuffer *buf)
             goto end_loop;
         } else if (c == '\n') {
             filebuf_split_line(buf, buf->crow, buf->ccol);
-            buf->crow += 1;
-            buf->ccol = 0;
+            filebuf_move_cursor(buf, 1, INT_MIN);
             goto end_loop;
         } else {
             /* not a special character */

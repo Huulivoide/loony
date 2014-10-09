@@ -16,23 +16,17 @@
 /* Reads a complete UTF-8 character to buf with getch().
  * buf must be at least 5 bytes (UTF-8 characters can be up to four bytes
  * and the character will be null terminated).
- * If the character is a backspace or some other special character, that
- * character is returned.
- * Returns -1 on error. */
+ * Returns 0 on success. */
 static int read_u8_char(char *buf)
 {
     int c = getch();
     int num_bytes;
     int i;
 
-    if (c == KEY_BACKSPACE) {
-        return c;
-    }
-
     num_bytes = u8_char_length(c);
     if (num_bytes == -1) {
         fprintf(stderr, "read a byte %d that's not a utf-8 start byte\n", c);
-        return -1;
+        return 1;
     }
 
     buf[0] = c;
@@ -87,23 +81,27 @@ void write_new_line (FileBuffer *buf, size_t pos)
 
 void insert_at_cursor(FileBuffer *buf)
 {
-    char tmp[5];
     int c;
 
     display_buf(buf);
 
-    while ((c = read_u8_char(tmp)) != -1) {
-        if (tmp[0] == 27) { /* 27 = escape */
-            return;
-        } else if (c == KEY_BACKSPACE) {
+    while ((c = getch()) != 27) { /* 27 = escape */
+        char tmp[5];
+        if (c == KEY_BACKSPACE) {
             if (buf->ccol > 0) {
                 (buf->ccol)--;
                 filebuf_delete_char(buf);
             } else if (buf->crow > 0) {
                 filebuf_join_with_next_line(buf, buf->crow-1);
-                goto end_loop;
             }
             goto end_loop;
+        } else {
+            /* not a special character */
+            ungetch(c);
+            if (read_u8_char(tmp) != 0) {
+                /* error */
+                return;
+            }
         }
 
         fileline_insert(buf->lines[buf->crow], tmp, buf->ccol);

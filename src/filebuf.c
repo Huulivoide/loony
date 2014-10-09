@@ -104,6 +104,24 @@ update_size:
     return 0;
 }
 
+int fileline_delete_to_eol(FileLine *line, size_t pos)
+{
+    size_t u8pos;
+
+    if (pos > line->num_chars) {
+        return 1;
+    }
+
+    if (u8_find_pos(line->text, pos, &u8pos)) {
+        return 1;
+    }
+
+    line->text[u8pos] = '\0';
+    line->num_bytes = u8pos;
+    line->num_chars = pos;
+    return 0;
+}
+
 /* Increases the size of a FileBuffer. */
 static void filebuf_grow (FileBuffer *buf)
 {
@@ -242,6 +260,30 @@ int filebuf_join_with_next_line(FileBuffer *buf, size_t pos)
     filebuf_delete_line(buf, pos+1);
     buf->crow = pos;
     buf->ccol = old_num_chars;
+    return 0;
+}
+
+int filebuf_split_line(FileBuffer *buf, size_t line, size_t pos)
+{
+    size_t u8pos;
+    
+    if (line >= buf->num_lines || pos >= buf->lines[line]->num_chars) {
+        return 1;
+    }
+
+    if (u8_find_pos(buf->lines[line]->text, pos, &u8pos)) {
+        return 1;
+    }
+
+    if (filebuf_insert_line(buf, fileline_init(buf->lines[line]->text+u8pos),
+                            line+1)) {
+        return 1;
+    }
+    
+    if (fileline_delete_to_eol(buf->lines[line], pos)) {
+        return 1;
+    }
+
     return 0;
 }
 

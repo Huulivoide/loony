@@ -57,6 +57,9 @@ void fileline_free (FileLine *line);
 /* Inserts text in a FileLine. Returns 0 on success. */
 int fileline_insert (FileLine *line, const char *text, size_t pos);
 
+/* Deletes all text from pos to end of line. Returns 0 on success. */
+int fileline_delete_to_eol(FileLine *line, size_t pos);
+
 /*
  * FileBuffer functions
  */
@@ -81,6 +84,10 @@ int filebuf_replace_line (FileBuffer *buf, FileLine *line, size_t pos);
 
 /* Join a line with the following line. Returns 0 on success. */
 int filebuf_join_with_next_line(FileBuffer *buf, size_t line);
+
+/* Splits the given line into two; the new line will start from the given
+ * position. Returns 0 on success. */
+int filebuf_split_line(FileBuffer *buf, size_t line, size_t pos);
 
 /* Loads the given file into a FileBuffer. Returns 0 on success. */
 int filebuf_load_file (FileBuffer *buf, const char *filename);

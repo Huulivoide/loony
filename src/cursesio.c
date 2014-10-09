@@ -95,6 +95,11 @@ void insert_at_cursor(FileBuffer *buf)
                 filebuf_join_with_next_line(buf, buf->crow-1);
             }
             goto end_loop;
+        } else if (c == '\n') {
+            filebuf_split_line(buf, buf->crow, buf->ccol);
+            buf->crow += 1;
+            buf->ccol = 0;
+            goto end_loop;
         } else {
             /* not a special character */
             ungetch(c);

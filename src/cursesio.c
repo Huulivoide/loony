@@ -57,7 +57,8 @@ void display_buf (FileBuffer *buf)
         mvprintw(i, 0,
                 "%*zu %s\n", line_digits, row+1, buf->lines[row]->text);
     }
-    move(buf->crow - buf->firstrow, buf->ccol + line_digits + 1);
+    move(filebuf_current_line(buf) - buf->firstrow,
+         filebuf_current_col(buf) + line_digits + 1);
     refresh();
 }
 
@@ -70,7 +71,7 @@ void write_new_line (FileBuffer *buf, size_t pos)
     }
 
     filebuf_insert_line(buf, fileline_init(""), pos);
-    filebuf_move_cursor(buf, pos - buf->crow, INT_MIN);
+    filebuf_move_cursor(buf, pos - filebuf_current_line(buf), INT_MIN);
     insert_at_cursor(buf);
 }
 
@@ -82,16 +83,18 @@ void insert_at_cursor(FileBuffer *buf)
 
     while ((c = getch()) != 27) { /* 27 = escape */
         char tmp[5];
+        int line = filebuf_current_line(buf);
+        int col = filebuf_current_col(buf);
         if (c == KEY_BACKSPACE) {
-            if (buf->ccol > 0) {
+            if (col > 0) {
                 filebuf_move_cursor(buf, 0, -1);
                 filebuf_delete_char(buf);
-            } else if (buf->crow > 0) {
-                filebuf_join_with_next_line(buf, buf->crow-1);
+            } else if (line > 0) {
+                filebuf_join_with_next_line(buf, line - 1);
             }
             goto end_loop;
         } else if (c == '\n') {
-            filebuf_split_line(buf, buf->crow, buf->ccol);
+            filebuf_split_line(buf, line, col);
             filebuf_move_cursor(buf, 1, INT_MIN);
             goto end_loop;
         } else {
@@ -103,7 +106,7 @@ void insert_at_cursor(FileBuffer *buf)
             }
         }
 
-        fileline_insert(buf->lines[buf->crow], tmp, buf->ccol);
+        fileline_insert(buf->lines[line], tmp, col);
         filebuf_move_cursor(buf, 0, 1);
 end_loop:
         display_buf(buf);

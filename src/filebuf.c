@@ -403,6 +403,16 @@ void filebuf_move_cursor (FileBuffer *buf, int dy, int dx)
     }
 }
 
+int filebuf_current_line(FileBuffer *buf)
+{
+    return buf->crow;
+}
+
+int filebuf_current_col(FileBuffer *buf)
+{
+    return buf->ccol;
+}
+
 int filebuf_delete_char (FileBuffer *buf)
 {
     /* First byte that should be deleted. Remember, UTF-8 characters can be

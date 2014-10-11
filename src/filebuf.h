@@ -100,5 +100,9 @@ int filebuf_save_file (FileBuffer *buf, const char *filename);
  * INT_MAX moves the cursor to the last line or column. */
 void filebuf_move_cursor (FileBuffer *buf, int dy, int dx);
 
+/* Returns the current line / column. */
+int filebuf_current_line(FileBuffer *buf);
+int filebuf_current_col(FileBuffer *buf);
+
 /* Deletes the character under the cursor. Returns 0 on success. */
 int filebuf_delete_char (FileBuffer *buf);

@@ -207,6 +207,15 @@ int filebuf_insert_line (FileBuffer *buf, FileLine *line, size_t pos)
     return 0;
 }
 
+int filebuf_insert_at_cursor(FileBuffer *buf, const char *text)
+{
+    int err;
+    if ((err =fileline_insert(buf->lines[buf->crow], text, buf->ccol))) {
+        return err;
+    }
+    filebuf_move_cursor(buf, 0, u8strlen(text));
+}
+
 int filebuf_delete_line (FileBuffer *buf, size_t pos)
 {
     assert(buf != NULL);

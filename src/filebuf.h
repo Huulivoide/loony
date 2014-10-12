@@ -76,6 +76,10 @@ int filebuf_append_line (FileBuffer *buf, FileLine *line);
 /* Adds a new line at the given position. Returns 0 on success. */
 int filebuf_insert_line (FileBuffer *buf, FileLine *line, size_t pos);
 
+/* Inserts text at the cursor and moves the cursor past the new text.
+ * Returns 0 on success. */
+int filebuf_insert_at_cursor(FileBuffer *buf, const char *text);
+
 /* Deletes the given line. Returns 0 on success. */
 int filebuf_delete_line (FileBuffer *buf, size_t pos);
 

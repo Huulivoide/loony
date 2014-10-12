@@ -106,8 +106,7 @@ void insert_at_cursor(FileBuffer *buf)
             }
         }
 
-        fileline_insert(buf->lines[line], tmp, col);
-        filebuf_move_cursor(buf, 0, 1);
+        filebuf_insert_at_cursor(buf, tmp);
 end_loop:
         display_buf(buf);
     }

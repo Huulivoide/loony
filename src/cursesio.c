@@ -92,11 +92,9 @@ void insert_at_cursor(FileBuffer *buf)
             } else if (line > 0) {
                 filebuf_join_with_next_line(buf, line - 1);
             }
-            goto end_loop;
         } else if (c == '\n') {
             filebuf_split_line(buf, line, col);
             filebuf_move_cursor(buf, 1, INT_MIN);
-            goto end_loop;
         } else {
             /* not a special character */
             ungetch(c);
@@ -104,10 +102,8 @@ void insert_at_cursor(FileBuffer *buf)
                 /* error */
                 return;
             }
+            filebuf_insert_at_cursor(buf, tmp);
         }
-
-        filebuf_insert_at_cursor(buf, tmp);
-end_loop:
         display_buf(buf);
     }
 }

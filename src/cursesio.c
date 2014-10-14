@@ -57,8 +57,8 @@ void display_buf(TextBuffer *buf)
         mvprintw(i, 0,
                 "%*zu %s\n", line_digits, row+1, buf->lines[row]->text);
     }
-    move(textbuf_current_line(buf) - buf->firstrow,
-         textbuf_current_col(buf) + line_digits + 1);
+    move(textbuf_line_num(buf) - buf->firstrow,
+         textbuf_col_num(buf) + line_digits + 1);
     refresh();
 }
 
@@ -71,7 +71,7 @@ void write_new_line(TextBuffer *buf, size_t pos)
     }
 
     textbuf_insert_line(buf, textline_init(""), pos);
-    textbuf_move_cursor(buf, pos - textbuf_current_line(buf), INT_MIN);
+    textbuf_move_cursor(buf, pos - textbuf_line_num(buf), INT_MIN);
     insert_at_cursor(buf);
 }
 
@@ -83,8 +83,8 @@ void insert_at_cursor(TextBuffer *buf)
 
     while ((c = getch()) != 27) { /* 27 = escape */
         char tmp[5];
-        int line = textbuf_current_line(buf);
-        int col = textbuf_current_col(buf);
+        int line = textbuf_line_num(buf);
+        int col = textbuf_col_num(buf);
         if (c == KEY_BACKSPACE) {
             if (col > 0) {
                 textbuf_move_cursor(buf, 0, -1);

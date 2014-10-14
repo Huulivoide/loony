@@ -410,12 +410,12 @@ void textbuf_move_cursor(TextBuffer *buf, int dy, int dx)
     }
 }
 
-int textbuf_current_line(TextBuffer *buf)
+int textbuf_line_num(TextBuffer *buf)
 {
     return buf->crow;
 }
 
-int textbuf_current_col(TextBuffer *buf)
+int textbuf_col_num(TextBuffer *buf)
 {
     return buf->ccol;
 }

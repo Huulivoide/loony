@@ -104,9 +104,9 @@ int textbuf_save_file(TextBuffer *buf, const char *filename);
  * INT_MAX moves the cursor to the last line or column. */
 void textbuf_move_cursor(TextBuffer *buf, int dy, int dx);
 
-/* Returns the current line / column. */
-int textbuf_current_line(TextBuffer *buf);
-int textbuf_current_col(TextBuffer *buf);
+/* Returns the current line / column number. */
+int textbuf_line_num(TextBuffer *buf);
+int textbuf_col_num(TextBuffer *buf);
 
 /* Deletes the character under the cursor. Returns 0 on success. */
 int textbuf_delete_char(TextBuffer *buf);

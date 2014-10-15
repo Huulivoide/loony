@@ -454,3 +454,17 @@ int textbuf_delete_char(TextBuffer *buf)
     buf->lines[buf->crow]->num_chars -= 1;
     return 0;
 }
+
+const char *textbuf_get_line(const TextBuffer *buf, size_t line)
+{
+    if (buf->num_lines <= line) {
+        return NULL;
+    } else {
+        return buf->lines[line]->text;
+    }
+}
+
+const char *textbuf_current_line(const TextBuffer *buf)
+{
+    return buf->lines[buf->crow]->text;
+}

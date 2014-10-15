@@ -110,3 +110,11 @@ int textbuf_col_num(TextBuffer *buf);
 
 /* Deletes the character under the cursor. Returns 0 on success. */
 int textbuf_delete_char(TextBuffer *buf);
+
+/* Returns a pointer to the char array of the given line.
+ * Returns NULL on failure. */
+const char *textbuf_get_line(const TextBuffer *buf, size_t line);
+
+/* Returns a pointer to the char array of the current line.
+ * Returns NULL on failure. */
+const char *textbuf_current_line(const TextBuffer *buf);

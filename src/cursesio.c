@@ -55,7 +55,7 @@ void display_buf(TextBuffer *buf)
         move(i, 0);
         clrtoeol();
         mvprintw(i, 0,
-                "%*zu %s\n", line_digits, row+1, buf->lines[row]->text);
+                "%*zu %s\n", line_digits, row+1, textbuf_get_line(buf, row));
     }
     move(textbuf_line_num(buf) - buf->firstrow,
          textbuf_col_num(buf) + line_digits + 1);

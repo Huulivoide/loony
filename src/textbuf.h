@@ -22,6 +22,9 @@ typedef struct TextLine
     /* number of bytes in the text array (remember that UTF-8 characters can be
      * more than one byte */
     size_t num_bytes;
+    /* pointers to previous and next line */
+    struct TextLine *prev;
+    struct TextLine *next;
 } TextLine;
 
 /*

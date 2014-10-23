@@ -48,6 +48,8 @@ TextLine *textline_init(const char *text)
     line->textbuf_size = buf_size;
     line->num_chars = u8strlen(text);
     line->num_bytes = num_bytes;
+    line->prev = NULL;
+    line->next = NULL;
     return line;
 }
 

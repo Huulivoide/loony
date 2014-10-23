@@ -1,10 +1,8 @@
 /*
- * filebuf.c
- *
- * Functions and structs for handling reading from / writing to files.
+ * textbuf.c
  */
 
-#include "filebuf.h"
+#include "textbuf.h"
 
 #include <assert.h>
 #include <limits.h>
@@ -17,9 +15,9 @@
 
 #include "util.h"
 
-FileLine *fileline_init (const char *text)
+TextLine *textline_init(const char *text)
 {
-    FileLine *line;
+    TextLine *line;
     size_t num_bytes;
     size_t buf_size;
     char *newline;
@@ -53,7 +51,7 @@ FileLine *fileline_init (const char *text)
     return line;
 }
 
-void fileline_free (FileLine *line)
+void textline_free(TextLine *line)
 {
     if (!line) {
         return;
@@ -63,7 +61,7 @@ void fileline_free (FileLine *line)
     free(line);
 }
 
-int fileline_insert (FileLine *line, const char *text, size_t pos)
+int textline_insert(TextLine *line, const char *text, size_t pos)
 {
     size_t num_bytes = strlen(text);
     size_t new_size = line->num_bytes + num_bytes + 1;
@@ -105,7 +103,7 @@ update_size:
     return 0;
 }
 
-int fileline_delete_to_eol(FileLine *line, size_t pos)
+int textline_delete_to_eol(TextLine *line, size_t pos)
 {
     size_t u8pos;
 
@@ -123,20 +121,20 @@ int fileline_delete_to_eol(FileLine *line, size_t pos)
     return 0;
 }
 
-/* Increases the size of a FileBuffer. */
-static void filebuf_grow (FileBuffer *buf)
+/* Increases the size of a TextBuffer. */
+static void textbuf_grow(TextBuffer *buf)
 {
     if (buf->linebuf_size == 0) {
         buf->linebuf_size = 1;
     } else {
         buf->linebuf_size *= 2;
     }
-    buf->lines = realloc(buf->lines, sizeof(FileLine*) * buf->linebuf_size);
+    buf->lines = realloc(buf->lines, sizeof(TextLine*) * buf->linebuf_size);
 }
 
-FileBuffer *filebuf_init (void)
+TextBuffer *textbuf_init(void)
 {
-    FileBuffer *buf = malloc(sizeof(*buf));
+    TextBuffer *buf = malloc(sizeof(*buf));
     if (!buf) {
         return NULL;
     }
@@ -152,7 +150,7 @@ FileBuffer *filebuf_init (void)
     return buf;
 }
 
-void filebuf_free (FileBuffer *buf)
+void textbuf_free(TextBuffer *buf)
 {
     size_t i;
     if (!buf) {
@@ -160,19 +158,19 @@ void filebuf_free (FileBuffer *buf)
     }
 
     for (i = 0; i < buf->num_lines; ++i) {
-        fileline_free(buf->lines[i]);
+        textline_free(buf->lines[i]);
     }
     free(buf->lines);
     free(buf);
 }
 
-int filebuf_append_line (FileBuffer *buf, FileLine *line)
+int textbuf_append_line(TextBuffer *buf, TextLine *line)
 {
     assert(buf != NULL);
     assert(line != NULL);
 
     if (buf->num_lines == buf->linebuf_size) {
-        filebuf_grow(buf);
+        textbuf_grow(buf);
     }
 
     buf->lines[buf->num_lines] = line;
@@ -180,7 +178,7 @@ int filebuf_append_line (FileBuffer *buf, FileLine *line)
     return 0;
 }
 
-int filebuf_insert_line (FileBuffer *buf, FileLine *line, size_t pos)
+int textbuf_insert_line(TextBuffer *buf, TextLine *line, size_t pos)
 {
     size_t i;
 
@@ -195,7 +193,7 @@ int filebuf_insert_line (FileBuffer *buf, FileLine *line, size_t pos)
     }
 
     if (buf->num_lines == buf->linebuf_size) {
-        filebuf_grow(buf);
+        textbuf_grow(buf);
     }
 
     for (i = buf->num_lines; i > pos; --i) {
@@ -207,16 +205,16 @@ int filebuf_insert_line (FileBuffer *buf, FileLine *line, size_t pos)
     return 0;
 }
 
-int filebuf_insert_at_cursor(FileBuffer *buf, const char *text)
+int textbuf_insert_at_cursor(TextBuffer *buf, const char *text)
 {
     int err;
-    if ((err =fileline_insert(buf->lines[buf->crow], text, buf->ccol))) {
+    if ((err =textline_insert(buf->lines[buf->crow], text, buf->ccol))) {
         return err;
     }
-    filebuf_move_cursor(buf, 0, u8strlen(text));
+    textbuf_move_cursor(buf, 0, u8strlen(text));
 }
 
-int filebuf_delete_line (FileBuffer *buf, size_t pos)
+int textbuf_delete_line(TextBuffer *buf, size_t pos)
 {
     assert(buf != NULL);
 
@@ -226,7 +224,7 @@ int filebuf_delete_line (FileBuffer *buf, size_t pos)
         return 1;
     }
 
-    fileline_free(buf->lines[pos]);
+    textline_free(buf->lines[pos]);
     buf->num_lines -= 1;
 
     for (; pos < buf->num_lines; ++pos) {
@@ -234,14 +232,14 @@ int filebuf_delete_line (FileBuffer *buf, size_t pos)
     }
 
     if (buf->crow == buf->num_lines) {
-        filebuf_move_cursor(buf, -1, 0);
+        textbuf_move_cursor(buf, -1, 0);
     }
 
     buf->redraw_needed = 1;
     return 0;
 }
 
-int filebuf_replace_line (FileBuffer *buf, FileLine *line, size_t pos)
+int textbuf_replace_line(TextBuffer *buf, TextLine *line, size_t pos)
 {
     assert(buf != NULL);
     assert(line != NULL);
@@ -252,12 +250,12 @@ int filebuf_replace_line (FileBuffer *buf, FileLine *line, size_t pos)
         return 1;
     }
 
-    fileline_free(buf->lines[pos]);
+    textline_free(buf->lines[pos]);
     buf->lines[pos] = line;
     return 0;
 }
 
-int filebuf_join_with_next_line(FileBuffer *buf, size_t pos)
+int textbuf_join_with_next_line(TextBuffer *buf, size_t pos)
 {
     int old_num_chars;
     if (pos >= (buf->num_lines - 1)) {
@@ -265,15 +263,15 @@ int filebuf_join_with_next_line(FileBuffer *buf, size_t pos)
     }
 
     old_num_chars = buf->lines[pos]->num_chars;
-    fileline_insert(buf->lines[pos], buf->lines[pos+1]->text,
+    textline_insert(buf->lines[pos], buf->lines[pos+1]->text,
                     buf->lines[pos]->num_chars);
-    filebuf_delete_line(buf, pos+1);
+    textbuf_delete_line(buf, pos+1);
     buf->crow = pos;
     buf->ccol = old_num_chars;
     return 0;
 }
 
-int filebuf_split_line(FileBuffer *buf, size_t line, size_t pos)
+int textbuf_split_line(TextBuffer *buf, size_t line, size_t pos)
 {
     size_t u8pos;
     
@@ -285,19 +283,19 @@ int filebuf_split_line(FileBuffer *buf, size_t line, size_t pos)
         return 1;
     }
 
-    if (filebuf_insert_line(buf, fileline_init(buf->lines[line]->text+u8pos),
+    if (textbuf_insert_line(buf, textline_init(buf->lines[line]->text+u8pos),
                             line+1)) {
         return 1;
     }
     
-    if (fileline_delete_to_eol(buf->lines[line], pos)) {
+    if (textline_delete_to_eol(buf->lines[line], pos)) {
         return 1;
     }
 
     return 0;
 }
 
-int filebuf_load_file (FileBuffer *buf, const char *filename)
+int textbuf_load_file(TextBuffer *buf, const char *filename)
 {
     FILE *fp = NULL;
     char *line = NULL;
@@ -315,7 +313,7 @@ int filebuf_load_file (FileBuffer *buf, const char *filename)
     }
 
     for (i = 0; i < buf->num_lines; ++i) {
-        fileline_free(buf->lines[i]);
+        textline_free(buf->lines[i]);
     }
     free(buf->lines);
     buf->lines = NULL;
@@ -327,7 +325,7 @@ int filebuf_load_file (FileBuffer *buf, const char *filename)
         if ((newline = strchr(line, '\n'))) {
             *newline = '\0';
         }
-        filebuf_append_line(buf, fileline_init(line));
+        textbuf_append_line(buf, textline_init(line));
         free(line);
         line = NULL;
         n = 0;
@@ -338,7 +336,7 @@ int filebuf_load_file (FileBuffer *buf, const char *filename)
     return 0;
 }
 
-int filebuf_save_file (FileBuffer *buf, const char *filename)
+int textbuf_save_file(TextBuffer *buf, const char *filename)
 {
     FILE *fp;
     size_t i;
@@ -360,7 +358,7 @@ int filebuf_save_file (FileBuffer *buf, const char *filename)
     return 0;
 }
 
-void filebuf_move_cursor (FileBuffer *buf, int dy, int dx)
+void textbuf_move_cursor(TextBuffer *buf, int dy, int dx)
 {
     size_t win_h, win_w;
 
@@ -412,17 +410,17 @@ void filebuf_move_cursor (FileBuffer *buf, int dy, int dx)
     }
 }
 
-int filebuf_current_line(FileBuffer *buf)
+int textbuf_current_line(TextBuffer *buf)
 {
     return buf->crow;
 }
 
-int filebuf_current_col(FileBuffer *buf)
+int textbuf_current_col(TextBuffer *buf)
 {
     return buf->ccol;
 }
 
-int filebuf_delete_char (FileBuffer *buf)
+int textbuf_delete_char(TextBuffer *buf)
 {
     /* First byte that should be deleted. Remember, UTF-8 characters can be
      * more than one byte! */

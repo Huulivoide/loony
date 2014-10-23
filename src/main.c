@@ -13,21 +13,21 @@
 #include <curses.h>
 
 #include "cursesio.h"
-#include "filebuf.h"
+#include "textbuf.h"
 
 int main (int argc, char *argv[])
 {
 #define BUFSIZE 1024
-    FileBuffer *fbuf = filebuf_init();
+    TextBuffer *tbuf = textbuf_init();
 
     if (argc != 2) {
         printf("Loony must be launched with 'loony filename'\n");
         return 1;
     }
 
-    if (filebuf_load_file(fbuf, argv[1])) {
-        filebuf_free(fbuf);
-        fbuf = filebuf_init();
+    if (textbuf_load_file(tbuf, argv[1])) {
+        textbuf_free(tbuf);
+        tbuf = textbuf_init();
     }
 
     /* set the (hopefully) correct locale */
@@ -42,45 +42,45 @@ int main (int argc, char *argv[])
     for (;;) {
         int ch;
 
-        display_buf(fbuf);
+        display_buf(tbuf);
 
         ch = getch();
 
         if (ch == 'q') {
             goto end;
         } else if (ch == 'w') {
-            filebuf_save_file(fbuf, argv[1]);
+            textbuf_save_file(tbuf, argv[1]);
         } else if (ch == 'h') {
-            filebuf_move_cursor(fbuf, 0, -1);
+            textbuf_move_cursor(tbuf, 0, -1);
         } else if (ch == 'l') {
-            filebuf_move_cursor(fbuf, 0, 1);
+            textbuf_move_cursor(tbuf, 0, 1);
         } else if (ch == 'j') {
-            filebuf_move_cursor(fbuf, 1, 0);
+            textbuf_move_cursor(tbuf, 1, 0);
         } else if (ch == 'k') {
-            filebuf_move_cursor(fbuf, -1, 0);
+            textbuf_move_cursor(tbuf, -1, 0);
         } else if (ch == 'i') {
-            insert_at_cursor(fbuf);
+            insert_at_cursor(tbuf);
         } else if (ch == 'o') {
-            if (fbuf->num_lines == 0) {
-                write_new_line(fbuf, fbuf->crow);
+            if (tbuf->num_lines == 0) {
+                write_new_line(tbuf, tbuf->crow);
             } else {
-                write_new_line(fbuf, fbuf->crow+1);
+                write_new_line(tbuf, tbuf->crow+1);
             }
         } else if (ch == 'O') {
-            write_new_line(fbuf, fbuf->crow);
+            write_new_line(tbuf, tbuf->crow);
         } else if (ch == 'd') {
-            if (fbuf->num_lines != 0) {
-                filebuf_delete_line(fbuf, fbuf->crow);
+            if (tbuf->num_lines != 0) {
+                textbuf_delete_line(tbuf, tbuf->crow);
             }
         } else if (ch == 'x') {
-            if (fbuf->num_lines != 0) {
-                filebuf_delete_char(fbuf);
+            if (tbuf->num_lines != 0) {
+                textbuf_delete_char(tbuf);
             }
         }
     }
 
 end:
     endwin();
-    filebuf_free(fbuf);
+    textbuf_free(tbuf);
     return 0;
 }

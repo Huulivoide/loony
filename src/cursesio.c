@@ -38,7 +38,7 @@ static int read_u8_char(char *buf)
     return 0;
 }
 
-void display_buf (FileBuffer *buf)
+void display_buf(TextBuffer *buf)
 {
     size_t win_h, win_w; /* window size */
     int line_digits; /* how much space required for line numbers? */
@@ -57,12 +57,12 @@ void display_buf (FileBuffer *buf)
         mvprintw(i, 0,
                 "%*zu %s\n", line_digits, row+1, buf->lines[row]->text);
     }
-    move(filebuf_current_line(buf) - buf->firstrow,
-         filebuf_current_col(buf) + line_digits + 1);
+    move(textbuf_current_line(buf) - buf->firstrow,
+         textbuf_current_col(buf) + line_digits + 1);
     refresh();
 }
 
-void write_new_line (FileBuffer *buf, size_t pos)
+void write_new_line(TextBuffer *buf, size_t pos)
 {
     int win_h, win_w;
     getmaxyx(stdscr, win_h, win_w);
@@ -70,12 +70,12 @@ void write_new_line (FileBuffer *buf, size_t pos)
         buf->firstrow += 1;
     }
 
-    filebuf_insert_line(buf, fileline_init(""), pos);
-    filebuf_move_cursor(buf, pos - filebuf_current_line(buf), INT_MIN);
+    textbuf_insert_line(buf, textline_init(""), pos);
+    textbuf_move_cursor(buf, pos - textbuf_current_line(buf), INT_MIN);
     insert_at_cursor(buf);
 }
 
-void insert_at_cursor(FileBuffer *buf)
+void insert_at_cursor(TextBuffer *buf)
 {
     int c;
 
@@ -83,18 +83,18 @@ void insert_at_cursor(FileBuffer *buf)
 
     while ((c = getch()) != 27) { /* 27 = escape */
         char tmp[5];
-        int line = filebuf_current_line(buf);
-        int col = filebuf_current_col(buf);
+        int line = textbuf_current_line(buf);
+        int col = textbuf_current_col(buf);
         if (c == KEY_BACKSPACE) {
             if (col > 0) {
-                filebuf_move_cursor(buf, 0, -1);
-                filebuf_delete_char(buf);
+                textbuf_move_cursor(buf, 0, -1);
+                textbuf_delete_char(buf);
             } else if (line > 0) {
-                filebuf_join_with_next_line(buf, line - 1);
+                textbuf_join_with_next_line(buf, line - 1);
             }
         } else if (c == '\n') {
-            filebuf_split_line(buf, line, col);
-            filebuf_move_cursor(buf, 1, INT_MIN);
+            textbuf_split_line(buf, line, col);
+            textbuf_move_cursor(buf, 1, INT_MIN);
         } else {
             /* not a special character */
             ungetch(c);
@@ -102,7 +102,7 @@ void insert_at_cursor(FileBuffer *buf)
                 /* error */
                 return;
             }
-            filebuf_insert_at_cursor(buf, tmp);
+            textbuf_insert_at_cursor(buf, tmp);
         }
         display_buf(buf);
     }

@@ -32,10 +32,9 @@ typedef struct TextLine
  */
 typedef struct TextBuffer
 {
-    /* array of lines. TODO: change to a more efficient data structure */
-    TextLine **lines;
-    /* size of the lines array */
-    size_t linebuf_size;
+    /* first and last line in the buffer */
+    TextLine *head;
+    TextLine *tail;
     /* number of lines in the buffer */
     size_t num_lines;
     /* cursor location. first row/column is number 0. */

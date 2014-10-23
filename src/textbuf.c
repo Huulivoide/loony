@@ -123,15 +123,23 @@ int textline_delete_to_eol(TextLine *line, size_t pos)
     return 0;
 }
 
-/* Increases the size of a TextBuffer. */
-static void textbuf_grow(TextBuffer *buf)
+/*
+ * Internal functions to simplify some tasks
+ */
+
+/* Returns a pointer to the given TextLine. */
+static TextLine *textbuf_get_textline(const TextBuffer *buf, size_t pos)
 {
-    if (buf->linebuf_size == 0) {
-        buf->linebuf_size = 1;
-    } else {
-        buf->linebuf_size *= 2;
+    TextLine *tmp;
+    assert(buf != NULL);
+
+    tmp = buf->head;
+    while (pos-- > 0) {
+        assert(tmp != NULL);
+        tmp = tmp->next;
     }
-    buf->lines = realloc(buf->lines, sizeof(TextLine*) * buf->linebuf_size);
+
+    return tmp;
 }
 
 TextBuffer *textbuf_init(void)
@@ -141,8 +149,8 @@ TextBuffer *textbuf_init(void)
         return NULL;
     }
 
-    buf->lines = NULL;
-    buf->linebuf_size = 0;
+    buf->head = NULL;
+    buf->tail = NULL;
     buf->num_lines = 0;
     buf->crow = 0;
     buf->ccol = 0;
@@ -154,15 +162,18 @@ TextBuffer *textbuf_init(void)
 
 void textbuf_free(TextBuffer *buf)
 {
-    size_t i;
+    TextLine *tmp;
     if (!buf) {
         return;
     }
 
-    for (i = 0; i < buf->num_lines; ++i) {
-        textline_free(buf->lines[i]);
+    tmp = buf->head;
+    while (tmp) {
+        TextLine *next = tmp->next;
+        textline_free(tmp);
+        tmp = next;
     }
-    free(buf->lines);
+
     free(buf);
 }
 
@@ -171,19 +182,21 @@ int textbuf_append_line(TextBuffer *buf, TextLine *line)
     assert(buf != NULL);
     assert(line != NULL);
 
-    if (buf->num_lines == buf->linebuf_size) {
-        textbuf_grow(buf);
+    if (buf->tail) {
+        buf->tail->next = line;
+    } else {
+        buf->head = line;
     }
+    line->prev = buf->tail;
+    line->next = NULL;
+    buf->tail = line;
 
-    buf->lines[buf->num_lines] = line;
     buf->num_lines += 1;
     return 0;
 }
 
 int textbuf_insert_line(TextBuffer *buf, TextLine *line, size_t pos)
 {
-    size_t i;
-
     assert(buf != NULL);
     assert(line != NULL);
 
@@ -194,15 +207,30 @@ int textbuf_insert_line(TextBuffer *buf, TextLine *line, size_t pos)
         return 1;
     }
 
-    if (buf->num_lines == buf->linebuf_size) {
-        textbuf_grow(buf);
+    if (buf->head == NULL) {
+        buf->head = line;
+        buf->tail = line;
+        line->prev = NULL;
+        line->next = NULL;
+    } else if (pos == buf->num_lines) {
+        return textbuf_append_line(buf, line);
+    } else {
+        TextLine *tmp = textbuf_get_textline(buf, pos);
+
+        /* this should've been handled in the previous if statement unless
+         * num_lines is incorrect */
+        assert(tmp != NULL);
+
+        if (tmp->prev) {
+            tmp->prev->next = line;
+        } else {
+            buf->head = line;
+        }
+        line->prev = tmp->prev;
+        line->next = tmp;
+        tmp->prev = line;
     }
 
-    for (i = buf->num_lines; i > pos; --i) {
-        buf->lines[i] = buf->lines[i-1];
-    }
-
-    buf->lines[pos] = line;
     buf->num_lines += 1;
     return 0;
 }
@@ -210,7 +238,8 @@ int textbuf_insert_line(TextBuffer *buf, TextLine *line, size_t pos)
 int textbuf_insert_at_cursor(TextBuffer *buf, const char *text)
 {
     int err;
-    if ((err =textline_insert(buf->lines[buf->crow], text, buf->ccol))) {
+    if ((err = textline_insert(textbuf_get_textline(buf, buf->crow),
+                               text, buf->ccol))) {
         return err;
     }
     textbuf_move_cursor(buf, 0, u8strlen(text));
@@ -218,6 +247,8 @@ int textbuf_insert_at_cursor(TextBuffer *buf, const char *text)
 
 int textbuf_delete_line(TextBuffer *buf, size_t pos)
 {
+    TextLine *tmp;
+
     assert(buf != NULL);
 
     if (buf->num_lines <= pos) {
@@ -226,12 +257,22 @@ int textbuf_delete_line(TextBuffer *buf, size_t pos)
         return 1;
     }
 
-    textline_free(buf->lines[pos]);
-    buf->num_lines -= 1;
+    tmp = textbuf_get_textline(buf, pos);
 
-    for (; pos < buf->num_lines; ++pos) {
-        buf->lines[pos] = buf->lines[pos+1];
+    if (tmp->prev) {
+        tmp->prev->next = tmp->next;
+    } else {
+        buf->head = tmp->next;
     }
+
+    if (tmp->next) {
+        tmp->next->prev = tmp->prev;
+    } else {
+        buf->tail = tmp->prev;
+    }
+
+    textline_free(tmp);
+    buf->num_lines -= 1;
 
     if (buf->crow == buf->num_lines) {
         textbuf_move_cursor(buf, -1, 0);
@@ -243,6 +284,8 @@ int textbuf_delete_line(TextBuffer *buf, size_t pos)
 
 int textbuf_replace_line(TextBuffer *buf, TextLine *line, size_t pos)
 {
+    TextLine *tmp;
+
     assert(buf != NULL);
     assert(line != NULL);
 
@@ -252,45 +295,69 @@ int textbuf_replace_line(TextBuffer *buf, TextLine *line, size_t pos)
         return 1;
     }
 
-    textline_free(buf->lines[pos]);
-    buf->lines[pos] = line;
+    tmp = textbuf_get_textline(buf, pos);
+
+    if (tmp->prev) {
+        tmp->prev->next = line;
+    } else {
+        buf->head = line;
+    }
+
+    if (tmp->next) {
+        tmp->next->prev = line;
+    } else {
+        buf->tail = line;
+    }
+
+    textline_free(tmp);
     return 0;
 }
 
 int textbuf_join_with_next_line(TextBuffer *buf, size_t pos)
 {
     int old_num_chars;
+    TextLine *tmp;
+    TextLine *next;
     if (pos >= (buf->num_lines - 1)) {
         return 1;
     }
 
-    old_num_chars = buf->lines[pos]->num_chars;
-    textline_insert(buf->lines[pos], buf->lines[pos+1]->text,
-                    buf->lines[pos]->num_chars);
-    textbuf_delete_line(buf, pos+1);
+    tmp = textbuf_get_textline(buf, pos);
+    next = tmp->next;
+    old_num_chars = tmp->num_chars;
+    textline_insert(tmp, next->text, tmp->num_chars);
+    if (next->next) {
+        next->next->prev = tmp;
+    } else {
+        buf->tail = tmp;
+    }
+    tmp->next = next->next;
+    textline_free(next);
     buf->crow = pos;
     buf->ccol = old_num_chars;
+    --buf->num_lines;
     return 0;
 }
 
 int textbuf_split_line(TextBuffer *buf, size_t line, size_t pos)
 {
     size_t u8pos;
+    TextLine *tmp;
     
-    if (line >= buf->num_lines || pos >= buf->lines[line]->num_chars) {
+    tmp = textbuf_get_textline(buf, line);
+    if (line >= buf->num_lines || pos >= tmp->num_chars) {
         return 1;
     }
 
-    if (u8_find_pos(buf->lines[line]->text, pos, &u8pos)) {
+    if (u8_find_pos(tmp->text, pos, &u8pos)) {
         return 1;
     }
 
-    if (textbuf_insert_line(buf, textline_init(buf->lines[line]->text+u8pos),
-                            line+1)) {
+    if (textbuf_insert_line(buf, textline_init(tmp->text+u8pos), line+1)) {
         return 1;
     }
     
-    if (textline_delete_to_eol(buf->lines[line], pos)) {
+    if (textline_delete_to_eol(tmp, pos)) {
         return 1;
     }
 
@@ -303,7 +370,7 @@ int textbuf_load_file(TextBuffer *buf, const char *filename)
     char *line = NULL;
     size_t n = 0;
     ssize_t num_chars = 0;
-    size_t i;
+    TextLine *tmp;
 
     assert(buf != NULL);
     assert(filename != NULL);
@@ -314,12 +381,14 @@ int textbuf_load_file(TextBuffer *buf, const char *filename)
         return 1;
     }
 
-    for (i = 0; i < buf->num_lines; ++i) {
-        textline_free(buf->lines[i]);
+    tmp = buf->head;
+    while (tmp) {
+        TextLine *next = tmp->next;
+        textline_free(tmp);
+        tmp = next;
     }
-    free(buf->lines);
-    buf->lines = NULL;
-    buf->linebuf_size = 0;
+    buf->head = NULL;
+    buf->tail = NULL;
     buf->num_lines = 0;
 
     while ((num_chars = getline(&line, &n, fp)) != -1) {
@@ -341,7 +410,7 @@ int textbuf_load_file(TextBuffer *buf, const char *filename)
 int textbuf_save_file(TextBuffer *buf, const char *filename)
 {
     FILE *fp;
-    size_t i;
+    TextLine *tmp;
 
     assert(buf != NULL);
     assert(filename != NULL);
@@ -352,8 +421,10 @@ int textbuf_save_file(TextBuffer *buf, const char *filename)
         return 1;
     }
 
-    for (i = 0; i < buf->num_lines; ++i) {
-        fprintf(fp, "%s\n", buf->lines[i]->text);
+    tmp = buf->head;
+    while (tmp) {
+        fprintf(fp, "%s\n", tmp->text);
+        tmp = tmp->next;
     }
 
     fclose(fp);
@@ -387,7 +458,7 @@ void textbuf_move_cursor(TextBuffer *buf, int dy, int dx)
     if (dx == INT_MIN) {
         buf->ccol = 0;
     } else if (dx == INT_MAX) {
-        buf->ccol = buf->lines[buf->crow]->num_chars;
+        buf->ccol = textbuf_get_textline(buf, buf->crow)->num_chars;
     } else {
         buf->ccol += dx;
     }
@@ -400,8 +471,8 @@ void textbuf_move_cursor(TextBuffer *buf, int dy, int dx)
 
     if (buf->ccol < 0) {
         buf->ccol = 0;
-    } else if (buf->ccol > buf->lines[buf->crow]->num_chars) {
-        buf->ccol = buf->lines[buf->crow]->num_chars;
+    } else if (buf->ccol > textbuf_get_textline(buf, buf->crow)->num_chars) {
+        buf->ccol = textbuf_get_textline(buf, buf->crow)->num_chars;
     }
 
     /* scrolling required? */
@@ -430,19 +501,25 @@ int textbuf_delete_char(TextBuffer *buf)
     /* How many bytes were deleted? */
     size_t deleted_bytes = 1;
     char *s;
+    TextLine *tmp;
 
     assert(buf != NULL);
 
-    if (buf->ccol >= buf->lines[buf->crow]->num_chars) {
+    tmp = textbuf_get_textline(buf, buf->crow);
+    if (!tmp) {
+        return 1;
+    }
+
+    if (buf->ccol >= tmp->num_chars) {
         return 0; /* cursor is one character past the end of the line */
     }
 
-    if (u8_find_pos(buf->lines[buf->crow]->text, buf->ccol, &first_to_delete)) {
+    if (u8_find_pos(tmp->text, buf->ccol, &first_to_delete)) {
         fprintf(stderr, "Can't find pos %d in buf\n", buf->ccol);
         return 1;
     }
     
-    s = buf->lines[buf->crow]->text + first_to_delete + 1;
+    s = tmp->text + first_to_delete + 1;
     for (; !is_u8_start_byte(*s); ++s) {
         deleted_bytes++;
     }
@@ -452,8 +529,8 @@ int textbuf_delete_char(TextBuffer *buf)
     }
     *s = '\0';
 
-    buf->lines[buf->crow]->num_bytes -= deleted_bytes;
-    buf->lines[buf->crow]->num_chars -= 1;
+    tmp->num_bytes -= deleted_bytes;
+    tmp->num_chars -= 1;
     return 0;
 }
 
@@ -462,11 +539,21 @@ const char *textbuf_get_line(const TextBuffer *buf, size_t line)
     if (buf->num_lines <= line) {
         return NULL;
     } else {
-        return buf->lines[line]->text;
+        TextLine *tmp = textbuf_get_textline(buf, line);
+        if (!tmp) {
+            return NULL;
+        } else {
+            return tmp->text;
+        }
     }
 }
 
 const char *textbuf_current_line(const TextBuffer *buf)
 {
-    return buf->lines[buf->crow]->text;
+    TextLine *tmp = textbuf_get_textline(buf, buf->crow);
+    if (!tmp) {
+        return NULL;
+    } else {
+        return tmp->text;
+    }
 }

@@ -50,6 +50,11 @@ void display_buf(TextBuffer *buf)
 
     line_digits = buf->num_lines == 0 ? 1 : log10(buf->num_lines) + 1;
 
+    if (buf->redraw_needed) {
+        erase();
+        buf->redraw_needed = 0;
+    }
+
     for (i = 0; i < win_h && buf->firstrow + i < buf->num_lines; ++i) {
         size_t row = buf->firstrow + i;
         move(i, 0);

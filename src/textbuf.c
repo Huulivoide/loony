@@ -345,20 +345,24 @@ int textbuf_split_line(TextBuffer *buf, size_t line, size_t pos)
     TextLine *tmp;
     
     tmp = textbuf_get_textline(buf, line);
-    if (line >= buf->num_lines || pos >= tmp->num_chars) {
+    if (line >= buf->num_lines || pos > tmp->num_chars) {
         return 1;
     }
 
-    if (u8_find_pos(tmp->text, pos, &u8pos)) {
-        return 1;
-    }
+    if (pos == tmp->num_bytes) {
+        return textbuf_insert_line(buf, textline_init(""), line+1);
+    } else {
+        if (u8_find_pos(tmp->text, pos, &u8pos)) {
+            return 1;
+        }
 
-    if (textbuf_insert_line(buf, textline_init(tmp->text+u8pos), line+1)) {
-        return 1;
-    }
-    
-    if (textline_delete_to_eol(tmp, pos)) {
-        return 1;
+        if (textbuf_insert_line(buf, textline_init(tmp->text+u8pos), line+1)) {
+            return 1;
+        }
+
+        if (textline_delete_to_eol(tmp, pos)) {
+            return 1;
+        }
     }
 
     return 0;

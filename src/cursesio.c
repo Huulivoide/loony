@@ -38,17 +38,37 @@ static int read_u8_char(char *buf)
     return 0;
 }
 
+/* Calculates the x-position of cursor on the given line. Tabs make this
+ * surprisingly difficult. Wide characters are not handled yet. */
+static size_t actual_column(const char *line, size_t cursor_x)
+{
+    size_t column = 0;
+
+    while (cursor_x-- > 0) {
+        if (is_u8_ascii_char(*line) && *line == '\t') {
+            column += TABSIZE - column % TABSIZE;
+        } else {
+            ++column;
+        }
+        do {
+            ++line;
+        } while (is_u8_cont_byte(*line));
+    }
+
+    return column;
+}
+
 void display_buf(TextBuffer *buf)
 {
     size_t win_h, win_w; /* window size */
     int line_digits; /* how much space required for line numbers? */
     size_t i;
+    size_t curr_line_num = textbuf_line_num(buf);
+    const char *curr_line_text = textbuf_get_line(buf, curr_line_num);
 
     assert(buf != NULL);
 
     getmaxyx(stdscr, win_h, win_w);
-
-    line_digits = buf->num_lines == 0 ? 1 : log10(buf->num_lines) + 1;
 
     if (buf->redraw_needed) {
         erase();
@@ -60,10 +80,11 @@ void display_buf(TextBuffer *buf)
         move(i, 0);
         clrtoeol();
         mvprintw(i, 0,
-                "%*zu %s\n", line_digits, row+1, textbuf_get_line(buf, row));
+                "%*zu\t%s\n", TABSIZE-1, row+1, textbuf_get_line(buf, row));
     }
+
     move(textbuf_line_num(buf) - buf->firstrow,
-         textbuf_col_num(buf) + line_digits + 1);
+         TABSIZE + actual_column(curr_line_text, buf->ccol));
     refresh();
 }
 

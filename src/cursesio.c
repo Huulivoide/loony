@@ -75,13 +75,16 @@ void display_buf(TextBuffer *buf)
         buf->redraw_needed = 0;
     }
 
-    for (i = 0; i < win_h && buf->firstrow + i < buf->num_lines; ++i) {
+    for (i = 0; i < win_h - 1 && buf->firstrow + i < buf->num_lines; ++i) {
         size_t row = buf->firstrow + i;
         move(i, 0);
         clrtoeol();
         mvprintw(i, 0,
                 "%*zu\t%s\n", TABSIZE-1, row+1, textbuf_get_line(buf, row));
     }
+
+    /* draw statusbar */
+    mvaddstr(win_h-1, 0, buf->statusbar_text);
 
     move(textbuf_line_num(buf) - buf->firstrow,
          TABSIZE + actual_column(curr_line_text, buf->ccol));

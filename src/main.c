@@ -42,6 +42,7 @@ int main (int argc, char *argv[])
     for (;;) {
         int ch;
 
+        textbuf_set_statusbar(tbuf, "Loony ALPHA");
         display_buf(tbuf);
 
         ch = getch();

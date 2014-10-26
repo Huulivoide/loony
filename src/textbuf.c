@@ -156,6 +156,7 @@ TextBuffer *textbuf_init(void)
     buf->ccol = 0;
     buf->firstrow = 0;
     buf->redraw_needed = 0;
+    buf->statusbar_text[0] = '\0';
 
     return buf;
 }
@@ -450,6 +451,7 @@ void textbuf_move_cursor(TextBuffer *buf, int dy, int dx)
     }
 
     getmaxyx(stdscr, win_h, win_w);
+    --win_h; /* save a line for the statusbar */
 
     if (dy == INT_MIN) {
         buf->crow = 0;
@@ -560,4 +562,10 @@ const char *textbuf_current_line(const TextBuffer *buf)
     } else {
         return tmp->text;
     }
+}
+
+void textbuf_set_statusbar(TextBuffer *buf, const char *text)
+{
+    strncpy(buf->statusbar_text, text, STATUSBAR_LENGTH - 1);
+    buf->statusbar_text[STATUSBAR_LENGTH-1] = '\0';
 }

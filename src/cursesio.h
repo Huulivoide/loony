@@ -1,5 +1,6 @@
 /**
  * @file cursesio.h
+ * @author dreamyeyed
  *
  * Input / output using the curses library.
  */

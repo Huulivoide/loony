@@ -1,5 +1,6 @@
 /**
  * @file textbuf.h
+ * @author dreamyeyed
  *
  * TextBuffers are the main structures of Loony. They are basically equivalent
  * to single files.

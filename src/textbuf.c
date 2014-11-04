@@ -158,6 +158,9 @@ TextBuffer *textbuf_init(void)
     buf->redraw_needed = 0;
     buf->statusbar_text[0] = '\0';
 
+    /* a buffer should always have at least one line */
+    textbuf_append_line(buf, textline_init(""));
+
     return buf;
 }
 
@@ -280,6 +283,13 @@ int textbuf_delete_line(TextBuffer *buf, size_t pos)
     }
 
     buf->redraw_needed = 1;
+
+    /* make sure there's always at least one line in the buffer */
+    if (buf->num_lines == 0) {
+        textbuf_append_line(buf, textline_init(""));
+        textbuf_move_cursor(buf, INT_MIN, INT_MIN);
+    }
+
     return 0;
 }
 

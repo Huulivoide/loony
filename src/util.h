@@ -36,7 +36,7 @@ int is_u8_ascii_char(char c);
  * Returns the length of a UTF-8 codepoint in bytes.
  *
  * @param c a start byte
- * @return length of the codepoint in bytes if c is a start byte, 0 otherwise
+ * @return length of the codepoint in bytes if c is a start byte, -1 otherwise
  */
 int u8_char_length(char c);
 

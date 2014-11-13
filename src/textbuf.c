@@ -279,8 +279,6 @@ int textbuf_delete_line(TextBuffer *buf, size_t pos)
         textbuf_move_cursor(buf, -1, 0);
     }
 
-    buf->redraw_needed = 1;
-
     /* make sure there's always at least one line in the buffer */
     if (buf->num_lines == 0) {
         textbuf_append_line(buf, textline_init(""));

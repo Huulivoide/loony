@@ -514,9 +514,9 @@ int textbuf_delete_char(TextBuffer *buf)
     /* First byte that should be deleted. Remember, UTF-8 characters can be
      * more than one byte! */
     size_t first_to_delete;
-    /* How many bytes were deleted? */
-    size_t deleted_bytes = 1;
-    char *s;
+    /* How many bytes must be deleted? */
+    size_t deleted_bytes;
+    size_t i;
     TextLine *tmp;
 
     assert(buf != NULL);
@@ -531,19 +531,18 @@ int textbuf_delete_char(TextBuffer *buf)
     }
 
     if (u8_find_pos(tmp->text, buf->ccol, &first_to_delete)) {
-        fprintf(stderr, "Can't find pos %d in buf\n", buf->ccol);
         return 1;
     }
-    
-    s = tmp->text + first_to_delete + 1;
-    for (; !is_u8_start_byte(*s); ++s) {
-        deleted_bytes++;
+
+    deleted_bytes = u8_char_length(tmp->text[first_to_delete]);
+
+    if (deleted_bytes == -1) {
+        return 1;
     }
-    s -= deleted_bytes;
-    for (; s[deleted_bytes]; ++s) {
-        *s = s[deleted_bytes];
+
+    for (i = first_to_delete; i <= tmp->num_bytes - deleted_bytes; ++i) {
+        tmp->text[i] = tmp->text[i+deleted_bytes];
     }
-    *s = '\0';
 
     tmp->num_bytes -= deleted_bytes;
     tmp->num_chars -= 1;

@@ -13,9 +13,6 @@
 
 #include <stddef.h>
 
-/** maximum length of statusbar text */
-#define STATUSBAR_LENGTH 256
-
 /**
  * Represents one line of text.
  */
@@ -53,12 +50,6 @@ typedef struct TextBuffer
     int crow;
     /** column number of cursor (first column is 0) */
     int ccol;
-    /** first row displayed on screen */
-    int firstrow;
-    /** non-zero if the screen should be completely redrawn */
-    int redraw_needed;
-    /** text on the statusbar */
-    char statusbar_text[STATUSBAR_LENGTH];
 } TextBuffer;
 
 /*
@@ -260,11 +251,3 @@ const char *textbuf_get_line(const TextBuffer *buf, size_t line);
  * @return pointer to char array or NULL if there is an error
  */
 const char *textbuf_current_line(const TextBuffer *buf);
-
-/**
- * Sets the text on the statusbar.
- *
- * @param buf
- * @param text the new text
- */
-void textbuf_set_statusbar(TextBuffer *buf, const char *text);

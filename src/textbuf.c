@@ -154,9 +154,6 @@ TextBuffer *textbuf_init(void)
     buf->num_lines = 0;
     buf->crow = 0;
     buf->ccol = 0;
-    buf->firstrow = 0;
-    buf->redraw_needed = 0;
-    buf->statusbar_text[0] = '\0';
 
     /* a buffer should always have at least one line */
     textbuf_append_line(buf, textline_init(""));
@@ -281,8 +278,6 @@ int textbuf_delete_line(TextBuffer *buf, size_t pos)
     if (buf->crow == buf->num_lines) {
         textbuf_move_cursor(buf, -1, 0);
     }
-
-    buf->redraw_needed = 1;
 
     /* make sure there's always at least one line in the buffer */
     if (buf->num_lines == 0) {
@@ -448,20 +443,11 @@ int textbuf_save_file(TextBuffer *buf, const char *filename)
 
 void textbuf_move_cursor(TextBuffer *buf, int dy, int dx)
 {
-    size_t win_h, win_w;
-
     if (dx == 0 && dy == 0) {
         return;
     }
 
     assert(buf != NULL);
-
-    if (buf->num_lines == 0) {
-        return;
-    }
-
-    getmaxyx(stdscr, win_h, win_w);
-    --win_h; /* save a line for the statusbar */
 
     if (dy == INT_MIN) {
         buf->crow = 0;
@@ -489,13 +475,6 @@ void textbuf_move_cursor(TextBuffer *buf, int dy, int dx)
         buf->ccol = 0;
     } else if (buf->ccol > textbuf_get_textline(buf, buf->crow)->num_chars) {
         buf->ccol = textbuf_get_textline(buf, buf->crow)->num_chars;
-    }
-
-    /* scrolling required? */
-    if (buf->crow < buf->firstrow) {
-        buf->firstrow = buf->crow;
-    } else if (buf->crow >= buf->firstrow + win_h) {
-        buf->firstrow = buf->crow - win_h + 1;
     }
 }
 
@@ -571,10 +550,4 @@ const char *textbuf_current_line(const TextBuffer *buf)
     } else {
         return tmp->text;
     }
-}
-
-void textbuf_set_statusbar(TextBuffer *buf, const char *text)
-{
-    strncpy(buf->statusbar_text, text, STATUSBAR_LENGTH - 1);
-    buf->statusbar_text[STATUSBAR_LENGTH-1] = '\0';
 }

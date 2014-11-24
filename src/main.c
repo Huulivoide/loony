@@ -19,6 +19,7 @@ int main (int argc, char *argv[])
 {
 #define BUFSIZE 1024
     TextBuffer *tbuf = textbuf_init();
+    LoonyWindow *win;
 
     if (argc != 2) {
         printf("Loony must be launched with 'loony filename'\n");
@@ -39,11 +40,13 @@ int main (int argc, char *argv[])
     keypad(stdscr, TRUE);
     noecho();
 
+    win = loonywin_init(tbuf, stdscr);
+
     for (;;) {
         int ch;
 
-        textbuf_set_statusbar(tbuf, "Loony ALPHA");
-        display_buf(tbuf);
+        loonywin_set_statusbar(win, "Loony ALPHA");
+        display_win(win);
 
         ch = getch();
 
@@ -52,23 +55,19 @@ int main (int argc, char *argv[])
         } else if (ch == 'w') {
             textbuf_save_file(tbuf, argv[1]);
         } else if (ch == 'h') {
-            textbuf_move_cursor(tbuf, 0, -1);
+            loonywin_move_cursor(win, 0, -1);
         } else if (ch == 'l') {
-            textbuf_move_cursor(tbuf, 0, 1);
+            loonywin_move_cursor(win, 0, 1);
         } else if (ch == 'j') {
-            textbuf_move_cursor(tbuf, 1, 0);
+            loonywin_move_cursor(win, 1, 0);
         } else if (ch == 'k') {
-            textbuf_move_cursor(tbuf, -1, 0);
+            loonywin_move_cursor(win, -1, 0);
         } else if (ch == 'i') {
-            insert_at_cursor(tbuf);
+            insert_at_cursor(win);
         } else if (ch == 'o') {
-            if (tbuf->num_lines == 0) {
-                write_new_line(tbuf, tbuf->crow);
-            } else {
-                write_new_line(tbuf, tbuf->crow+1);
-            }
+            write_new_line(win, tbuf->crow+1);
         } else if (ch == 'O') {
-            write_new_line(tbuf, tbuf->crow);
+            write_new_line(win, tbuf->crow);
         } else if (ch == 'd') {
             if (tbuf->num_lines != 0) {
                 textbuf_delete_line(tbuf, tbuf->crow);
@@ -82,6 +81,7 @@ int main (int argc, char *argv[])
 
 end:
     endwin();
+    loonywin_free(win);
     textbuf_free(tbuf);
     return 0;
 }

@@ -9,26 +9,26 @@
 
 #include <curses.h>
 
-#include "textbuf.h"
+#include "window.h"
 
 /**
- * Shows the contents of the given buffer on the screen.
+ * Shows the contents of the given window on the screen.
  *
- * @param buf the buffer to be displayed
+ * @param win the window to be displayed
  */
-void display_buf(TextBuffer *buf);
+void display_win(LoonyWindow *win);
 
 /**
  * Allows the user to write a new line of text.
  *
- * @param buf the buffer where the new text should be added
+ * @param win the window where the new text should be added
  * @param pos the line number of the new line
  */
-void write_new_line(TextBuffer *buf, size_t pos);
+void write_new_line(LoonyWindow *win, size_t pos);
 
 /**
  * Inserts more text at the cursor.
  *
- * @param buf the buffer where the next text should be added
+ * @param win the window where the next text should be added
  */
-void insert_at_cursor(TextBuffer *buf);
+void insert_at_cursor(LoonyWindow *win);

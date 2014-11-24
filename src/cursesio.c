@@ -58,25 +58,30 @@ static size_t actual_column(const char *line, size_t cursor_x)
     return column;
 }
 
-void display_buf(TextBuffer *buf)
+void display_win(LoonyWindow *win)
 {
     size_t win_h, win_w; /* window size */
     int line_digits; /* how much space required for line numbers? */
     size_t i;
-    size_t curr_line_num = textbuf_line_num(buf);
-    const char *curr_line_text = textbuf_get_line(buf, curr_line_num);
+    TextBuffer *buf;
+    size_t curr_line_num;
+    const char *curr_line_text;
 
-    assert(buf != NULL);
+    assert(win != NULL);
 
-    getmaxyx(stdscr, win_h, win_w);
+    buf = loonywin_get_buffer(win);
+    curr_line_num = textbuf_line_num(buf);
+    curr_line_text = textbuf_get_line(buf, curr_line_num);
 
-    if (buf->redraw_needed) {
+    getmaxyx(win->window, win_h, win_w);
+
+    if (win->redraw_needed) {
         erase();
-        buf->redraw_needed = 0;
+        win->redraw_needed = 0;
     }
 
-    for (i = 0; i < win_h - 1 && buf->firstrow + i < buf->num_lines; ++i) {
-        size_t row = buf->firstrow + i;
+    for (i = 0; i < win_h - 1 && win->firstrow + i < buf->num_lines; ++i) {
+        size_t row = win->firstrow + i;
         move(i, 0);
         clrtoeol();
         mvprintw(i, 0,
@@ -84,31 +89,41 @@ void display_buf(TextBuffer *buf)
     }
 
     /* draw statusbar */
-    mvaddstr(win_h-1, 0, buf->statusbar_text);
+    mvaddstr(win_h-1, 0, win->statusbar_text);
 
-    move(textbuf_line_num(buf) - buf->firstrow,
+    move(textbuf_line_num(buf) - win->firstrow,
          TABSIZE + actual_column(curr_line_text, buf->ccol));
     refresh();
 }
 
-void write_new_line(TextBuffer *buf, size_t pos)
+void write_new_line(LoonyWindow *win, size_t pos)
 {
     int win_h, win_w;
-    getmaxyx(stdscr, win_h, win_w);
-    if (pos >= win_h && pos - buf->firstrow >= win_h) {
-        buf->firstrow += 1;
+    TextBuffer *buf;
+    
+    assert(win != NULL);
+
+    getmaxyx(win->window, win_h, win_w);
+    buf = loonywin_get_buffer(win);
+
+    if (pos >= win_h && pos - win->firstrow >= win_h) {
+        win->firstrow += 1;
     }
 
     textbuf_insert_line(buf, textline_init(""), pos);
     textbuf_move_cursor(buf, pos - textbuf_line_num(buf), INT_MIN);
-    insert_at_cursor(buf);
+    insert_at_cursor(win);
 }
 
-void insert_at_cursor(TextBuffer *buf)
+void insert_at_cursor(LoonyWindow *win)
 {
     int c;
+    TextBuffer *buf;
 
-    display_buf(buf);
+    assert(win != NULL);
+
+    buf = loonywin_get_buffer(win);
+    display_win(win);
 
     while ((c = getch()) != 27) { /* 27 = escape */
         char tmp[5];
@@ -133,6 +148,6 @@ void insert_at_cursor(TextBuffer *buf)
             }
             textbuf_insert_at_cursor(buf, tmp);
         }
-        display_buf(buf);
+        display_win(win);
     }
 }

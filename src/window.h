@@ -65,3 +65,11 @@ void loonywin_move_cursor(LoonyWindow *win, int dy, int dx);
  * @param text the new text
  */
 void loonywin_set_statusbar(LoonyWindow *win, const char *text);
+
+/**
+ * Returns the buffer shown in the window.
+ *
+ * @param win
+ * @return pointer to a TextBuffer or NULL in case of error
+ */
+TextBuffer *loonywin_get_buffer(LoonyWindow *win);

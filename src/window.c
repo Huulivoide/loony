@@ -60,3 +60,8 @@ void loonywin_set_statusbar(LoonyWindow *win, const char *text)
     strncpy(win->statusbar_text, text, STATUSBAR_LENGTH - 1);
     win->statusbar_text[STATUSBAR_LENGTH-1] = '\0';
 }
+
+TextBuffer *loonywin_get_buffer(LoonyWindow *win)
+{
+    return win->buffer;
+}

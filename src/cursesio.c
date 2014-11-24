@@ -69,7 +69,7 @@ void display_win(LoonyWindow *win)
 
     assert(win != NULL);
 
-    buf = win->buffer;
+    buf = loonywin_get_buffer(win);
     curr_line_num = textbuf_line_num(buf);
     curr_line_text = textbuf_get_line(buf, curr_line_num);
 
@@ -104,7 +104,7 @@ void write_new_line(LoonyWindow *win, size_t pos)
     assert(win != NULL);
 
     getmaxyx(win->window, win_h, win_w);
-    buf = win->buffer;
+    buf = loonywin_get_buffer(win);
 
     if (pos >= win_h && pos - win->firstrow >= win_h) {
         win->firstrow += 1;
@@ -122,7 +122,7 @@ void insert_at_cursor(LoonyWindow *win)
 
     assert(win != NULL);
 
-    buf = win->buffer;
+    buf = loonywin_get_buffer(win);
     display_win(win);
 
     while ((c = getch()) != 27) { /* 27 = escape */

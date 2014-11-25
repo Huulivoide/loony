@@ -12,8 +12,6 @@
 
 #include "util.h"
 
-#define BUFSIZE 1024
-
 /* Reads a complete UTF-8 character to buf with getch().
  * buf must be at least 5 bytes (UTF-8 characters can be up to four bytes
  * and the character will be null terminated).

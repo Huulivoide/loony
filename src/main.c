@@ -17,7 +17,6 @@
 
 int main (int argc, char *argv[])
 {
-#define BUFSIZE 1024
     TextBuffer *tbuf = textbuf_init();
     LoonyWindow *win;
 

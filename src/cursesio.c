@@ -43,7 +43,7 @@ static size_t actual_column(const char *line, size_t cursor_x)
     size_t column = 0;
 
     while (cursor_x-- > 0) {
-        if (is_u8_ascii_char(*line) && *line == '\t') {
+        if (*line == '\t') {
             column += TABSIZE - column % TABSIZE;
         } else {
             ++column;

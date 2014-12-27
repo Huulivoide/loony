@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 static int levent_keypress_cmp(const LoonyEvent *a, const LoonyEvent *b)
 {
@@ -36,5 +37,47 @@ int loonyevent_cmp(const LoonyEvent *a, const LoonyEvent *b)
         return 1;
     } else {
         return cmp_functions[a->type](a, b);
+    }
+}
+
+static LoonyEvent *loonyevent_create_keypress(lua_State *L)
+{
+    LoonyEvent *event;
+
+    assert(L != NULL);
+
+    event = malloc(sizeof(*event));
+    if (!event) {
+        return NULL;
+    }
+
+    event->type = LEVENT_KEYPRESS;
+    event->data = malloc(1);
+    if (!event->data) {
+        free(event);
+        return NULL;
+    }
+
+    *(char *)event->data = lua_tostring(L, -2)[0];
+    return event;
+}
+
+/** Functions for creating events. */
+static LoonyEvent *(* const event_functions[])(lua_State *L) =
+{
+    loonyevent_create_keypress
+};
+
+LoonyEvent *loonyevent_create_event(lua_State *L)
+{
+    int event_num;
+
+    assert(L != NULL);
+
+    event_num = lua_tonumber(L, -3);
+    if (event_num < 0 || event_num >= LEVENT_NUM_EVENTS) {
+        return NULL;
+    } else {
+        return event_functions[event_num](L);
     }
 }

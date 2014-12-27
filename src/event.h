@@ -11,10 +11,13 @@
 
 #pragma once
 
+#include "lua.h"
+
 /** What kind of event happened? */
 typedef enum loonyevent_t
 {
-    LEVENT_KEYPRESS             /* a key was pressed */
+    LEVENT_KEYPRESS = 0,        /* a key was pressed */
+    LEVENT_NUM_EVENTS           /* number of different events */
 } loonyevent_t;
 
 /** A struct that represents an event. */
@@ -35,3 +38,11 @@ typedef struct LoonyEvent
  * @return negative, 0 or positive (similar to strcmp)
  */
 int loonyevent_cmp(const LoonyEvent *a, const LoonyEvent *b);
+
+/**
+ * Creates an event from the top elements of the Lua stack.
+ *
+ * @param L Lua virtual machine
+ * @return dynamically allocated event or NULL in case of error
+ */
+LoonyEvent *loonyevent_create_event(lua_State *L);

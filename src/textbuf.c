@@ -279,6 +279,13 @@ int textbuf_delete_line(TextBuffer *buf, size_t pos)
         textbuf_move_cursor(buf, -1, 0);
     }
 
+    /* If the next line is shorter than the deleted one, the cursor may be past
+     * its end. Move the cursor if that is the case. */
+    tmp = textbuf_get_textline(buf, textbuf_line_num(buf));
+    if (textbuf_col_num(buf) >= tmp->num_chars) {
+        textbuf_move_cursor(buf, 0, INT_MAX);
+    }
+
     /* make sure there's always at least one line in the buffer */
     if (buf->num_lines == 0) {
         textbuf_append_line(buf, textline_init(""));

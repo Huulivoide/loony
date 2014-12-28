@@ -33,7 +33,7 @@ LoonyHookError loonyhook_add_global(const LoonyEvent *event, int fn)
 {
     /* Create the array if it doesn't exist yet */
     if (!global_hooks) {
-        global_hooks = malloc(sizeof(LoonyHook *) * 16);
+        global_hooks = malloc(sizeof(*global_hooks) * 16);
         if (!global_hooks) {
             return LHOOK_NOMEM;
         }
@@ -44,7 +44,7 @@ LoonyHookError loonyhook_add_global(const LoonyEvent *event, int fn)
     /* Resize array if it's full */
     if (num_hooks == hooks_size) {
         global_hooks = realloc(global_hooks,
-                               sizeof(LoonyHook) * hooks_size * 2);
+                               sizeof(*global_hooks) * hooks_size * 2);
         if (!global_hooks) {
             return LHOOK_NOMEM;
         }
@@ -55,7 +55,7 @@ LoonyHookError loonyhook_add_global(const LoonyEvent *event, int fn)
     global_hooks[num_hooks].fn = fn;
     ++num_hooks;
     /* TODO: use something more efficient */
-    qsort(global_hooks, num_hooks, sizeof(LoonyHook), compare_hooks);
+    qsort(global_hooks, num_hooks, sizeof(*global_hooks), compare_hooks);
     return LHOOK_OK;
 }
 
@@ -63,10 +63,16 @@ int loonyhook_get_global(const LoonyEvent *event)
 {
     /* There's probably a better way to do this */
     LoonyHook dummy;
+
+    /* No hooks at all? */
+    if (!global_hooks) {
+        return LUA_NOREF;
+    }
+
     dummy.event = event;
     dummy.fn = 0;
     const LoonyHook *hook =
-            bsearch(&dummy, global_hooks, num_hooks, sizeof(LoonyHook),
+            bsearch(&dummy, global_hooks, num_hooks, sizeof(*global_hooks),
                     compare_hooks);
     if (hook) {
         return hook->fn;

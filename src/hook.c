@@ -63,6 +63,7 @@ int loonyhook_get_global(const LoonyEvent *event)
 {
     /* There's probably a better way to do this */
     LoonyHook dummy;
+    const LoonyHook *hook;
 
     /* No hooks at all? */
     if (!global_hooks) {
@@ -71,9 +72,8 @@ int loonyhook_get_global(const LoonyEvent *event)
 
     dummy.event = event;
     dummy.fn = 0;
-    const LoonyHook *hook =
-            bsearch(&dummy, global_hooks, num_hooks, sizeof(*global_hooks),
-                    compare_hooks);
+    hook = bsearch(&dummy, global_hooks, num_hooks, sizeof(*global_hooks),
+                   compare_hooks);
     if (hook) {
         return hook->fn;
     } else {

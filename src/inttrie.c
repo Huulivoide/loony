@@ -45,7 +45,7 @@ static IntTrieNode *node_init(char c)
  */
 static void node_free(IntTrieNode *node)
 {
-    for (int i = 0; i < node->num_children; ++i) {
+    for (size_t i = 0; i < node->num_children; ++i) {
         node_free(node->children[i]);
     }
 
@@ -76,7 +76,6 @@ static IntTrieStatus node_insert(IntTrieNode *node, const char *key, int value)
         }
 
         /* find the correct child node or create it if it doesn't exist yet */
-        IntTrieNode *child;
         int low = 0;
         int mid;
         int high = node->num_children - 1;
@@ -102,7 +101,7 @@ static IntTrieStatus node_insert(IntTrieNode *node, const char *key, int value)
                     realloc(node->children,
                             node->children_size * sizeof(*node->children));
         }
-        for (size_t i = node->num_children; i > low; --i) {
+        for (size_t i = node->num_children; i > (size_t) low; --i) {
             node->children[i] = node->children[i-1];
         }
         node->children[low] = node_init(*key);
@@ -130,7 +129,6 @@ static IntTrieStatus node_find(const IntTrieNode *node,
         }
 
         /* find the correct child node or create it if it doesn't exist yet */
-        IntTrieNode *child;
         int low = 0;
         int mid;
         int high = node->num_children - 1;

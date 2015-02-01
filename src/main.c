@@ -71,13 +71,29 @@ int main (int argc, char *argv[])
         loonywin_set_statusbar(win, cmd_buf);
 
         LoonyApiStatus status = loonyapi_get_callback(L, cmd_buf);
-        if (status == LOONYAPI_OK) {
-            loonyapi_push_loonywin(L, win);
-            int err = lua_pcall(L, 1, 0, 0);
-            if (err) {
-                loonywin_set_statusbar(win, lua_tostring(L, -1));
-                lua_pop(L, 1);
-            }
+        switch (status) {
+            case LOONYAPI_OK:
+                loonyapi_push_loonywin(L, win);
+                int err = lua_pcall(L, 1, 0, 0);
+                if (err) {
+                    loonywin_set_statusbar(win, lua_tostring(L, -1));
+                    lua_pop(L, 1);
+                }
+                cmd_buf[0] = '\0';
+                cmd_len = 0;
+                break;
+
+            case LOONYAPI_PARTIAL_MATCH:
+                break;
+
+            case LOONYAPI_NOT_FOUND:
+                loonywin_set_statusbar(win, "invalid command");
+                cmd_buf[0] = '\0';
+                cmd_len = 0;
+                break;
+
+            default:
+                break;
         }
 
         /*

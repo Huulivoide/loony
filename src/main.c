@@ -11,8 +11,12 @@
 #include <stdlib.h>
 
 #include <curses.h>
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
 
 #include "cursesio.h"
+#include "lua_api.h"
 #include "textbuf.h"
 
 int main (int argc, char *argv[])
@@ -41,14 +45,42 @@ int main (int argc, char *argv[])
 
     win = loonywin_init(tbuf, stdscr);
 
+    /* start Lua */
+    lua_State *L = luaL_newstate();
+    luaL_openlibs(L);
+    loonyapi_open(L);
+    if (luaL_dofile(L, SCRIPTDIR"/commands.lua")) {
+        loonywin_set_statusbar(win, lua_tostring(L, -1));
+        lua_pop(L, 1);
+    }
+
+    char cmd_buf[256];
+    size_t cmd_len = 0;
     for (;;) {
         int ch;
 
-        loonywin_set_statusbar(win, "Loony ALPHA");
         display_win(win);
 
         ch = getch();
+        if (ch == 'q') {
+            goto end;
+        }
+        cmd_buf[cmd_len] = ch;
+        ++cmd_len;
+        cmd_buf[cmd_len] = '\0';
+        loonywin_set_statusbar(win, cmd_buf);
 
+        LoonyApiStatus status = loonyapi_get_callback(L, cmd_buf);
+        if (status == LOONYAPI_OK) {
+            loonyapi_push_loonywin(L, win);
+            int err = lua_pcall(L, 1, 0, 0);
+            if (err) {
+                loonywin_set_statusbar(win, lua_tostring(L, -1));
+                lua_pop(L, 1);
+            }
+        }
+
+        /*
         if (ch == 'q') {
             goto end;
         } else if (ch == 'w') {
@@ -76,6 +108,7 @@ int main (int argc, char *argv[])
                 textbuf_delete_char(tbuf);
             }
         }
+        */
     }
 
 end:

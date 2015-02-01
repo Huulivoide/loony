@@ -5,6 +5,29 @@
 #include "inttrie.h"
 
 /*
+ * A wrapper around a LoonyWindow.
+ */
+typedef struct LuaLoonyWindow
+{
+    LoonyWindow *win;
+} LuaLoonyWindow;
+
+static int lw_set_statusbar(lua_State *L)
+{
+    LuaLoonyWindow *lwin = luaL_checkudata(L, 1, "loony.window");
+    loonywin_set_statusbar(lwin->win, luaL_checkstring(L, 2));
+    return 0;
+}
+
+/*
+ * LoonyWindow methods available to Lua.
+ */
+static const luaL_Reg loonywinlib[] = {
+    {"set_statusbar", lw_set_statusbar},
+    {NULL, NULL}
+};
+
+/*
  * Adds a new global command.
  */
 static int api_add_command(lua_State *L)
@@ -51,6 +74,13 @@ int loonyapi_open(lua_State *L)
     luaL_newlib(L, loonylib);
     lua_setglobal(L, "loony");
 
+    /* window metatable */
+    luaL_newmetatable(L, "loony.window");
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+    luaL_setfuncs(L, loonywinlib, 0);
+    lua_pop(L, 1);
+
     /* global keybindings */
     lua_pushlightuserdata(L, inttrie_init());
     lua_setfield(L, LUA_REGISTRYINDEX, "loony_keybinds");
@@ -80,4 +110,12 @@ int loonyapi_get_callback(lua_State *L, const char *cmd)
             return LOONYAPI_UNEXPECTED;
             break;
     }
+}
+
+LoonyApiStatus loonyapi_push_loonywin(lua_State *L, LoonyWindow *win)
+{
+    LuaLoonyWindow *lwin = lua_newuserdata(L, sizeof(*lwin));
+    lwin->win = win;
+    luaL_setmetatable(L, "loony.window");
+    return LOONYAPI_OK;
 }

@@ -9,10 +9,14 @@
 
 #include "lua.h"
 
+#include "textbuf.h"
+#include "window.h"
+
 /** Status messages from API functions. */
 typedef enum LoonyApiStatus
 {
     LOONYAPI_OK,                // no problems
+    LOONYAPI_ERROR,             // generic error
     LOONYAPI_PARTIAL_MATCH,     // given command is prefix of bound key sequence
     LOONYAPI_NOT_FOUND,         // no such command exists
     LOONYAPI_UNEXPECTED         // something unexpected happened
@@ -37,3 +41,12 @@ int loonyapi_open(lua_State *L);
  * prefix of an existing command, LOONYAPI_NOT_FOUND otherwise
  */
 int loonyapi_get_callback(lua_State *L, const char *cmd);
+
+/**
+ * Pushes a LoonyWindow on the Lua stack.
+ *
+ * @param L
+ * @param buf buffer to push on stack
+ * @return LOONYAPI_OK on success, LOONYAPI_ERROR otherwise
+ */
+LoonyApiStatus loonyapi_push_loonywin(lua_State *L, LoonyWindow *win);

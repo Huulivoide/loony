@@ -87,6 +87,8 @@ void display_win(LoonyWindow *win)
     }
 
     /* draw statusbar */
+    move(win_h-1, 0);
+    clrtoeol();
     mvaddstr(win_h-1, 0, win->statusbar_text);
 
     move(textbuf_line_num(buf) - win->firstrow,

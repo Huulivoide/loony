@@ -9,6 +9,15 @@
 
 #include "lua.h"
 
+/** Status messages from API functions. */
+typedef enum LoonyApiStatus
+{
+    LOONYAPI_OK,                // no problems
+    LOONYAPI_PARTIAL_MATCH,     // given command is prefix of bound key sequence
+    LOONYAPI_NOT_FOUND,         // no such command exists
+    LOONYAPI_UNEXPECTED         // something unexpected happened
+} LoonyApiStatus;
+
 /**
  * Open Lua API in the given state. The API functions will be in a global table
  * named "loony".
@@ -17,3 +26,14 @@
  * @return 0 on success
  */
 int loonyapi_open(lua_State *L);
+
+/**
+ * If command cmd exists, pushes the associated callback function on the Lua
+ * stack.
+ *
+ * @param L Lua state
+ * @param cmd command to check
+ * @return LOONYAPI_OK if command exists, LOONYAPI_PARTIAL_MATCH if cmd is
+ * prefix of an existing command, LOONYAPI_NOT_FOUND otherwise
+ */
+int loonyapi_get_callback(lua_State *L, const char *cmd);

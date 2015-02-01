@@ -57,3 +57,27 @@ int loonyapi_open(lua_State *L)
 
     return 0;
 }
+
+int loonyapi_get_callback(lua_State *L, const char *cmd)
+{
+    lua_getfield(L, LUA_REGISTRYINDEX, "loony_keybinds");
+    IntTrie *trie = lua_touserdata(L, -1);
+    int ref;
+    IntTrieStatus status = inttrie_find(trie, cmd, &ref);
+    switch (status) {
+        case INTTRIE_OK:
+            lua_pushinteger(L, ref);
+            lua_gettable(L, LUA_REGISTRYINDEX);
+            return LOONYAPI_OK;
+            break;
+        case INTTRIE_PARTIAL_MATCH:
+            return LOONYAPI_PARTIAL_MATCH;
+            break;
+        case INTTRIE_NOT_FOUND:
+            return LOONYAPI_NOT_FOUND;
+            break;
+        default:
+            return LOONYAPI_UNEXPECTED;
+            break;
+    }
+}

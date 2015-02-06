@@ -12,6 +12,13 @@ typedef struct LuaLoonyWindow
     LoonyWindow *win;
 } LuaLoonyWindow;
 
+static int lw_move(lua_State *L)
+{
+    LuaLoonyWindow *lwin = luaL_checkudata(L, 1, "loony.window");
+    loonywin_move_cursor(lwin->win, luaL_checkint(L, 2), luaL_checkint(L, 3));
+    return 0;
+}
+
 static int lw_set_statusbar(lua_State *L)
 {
     LuaLoonyWindow *lwin = luaL_checkudata(L, 1, "loony.window");
@@ -23,6 +30,7 @@ static int lw_set_statusbar(lua_State *L)
  * LoonyWindow methods available to Lua.
  */
 static const luaL_Reg loonywinlib[] = {
+    {"move", lw_move},
     {"set_statusbar", lw_set_statusbar},
     {NULL, NULL}
 };

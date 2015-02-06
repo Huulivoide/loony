@@ -1,4 +1,4 @@
-AM_CFLAGS = -Wall -Wextra -DSCRIPTDIR=\"$(datadir)/@PACKAGE@/lua\"
+AM_CFLAGS = -Wall -Wextra -DSCRIPTDIR=\"$(datadir)/@PACKAGE@/lua\" -std=gnu99
 AM_LDFLAGS = -lm -lncurses -llua
 bin_PROGRAMS = loony
 loony_SOURCES = main.c \

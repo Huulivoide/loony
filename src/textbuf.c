@@ -392,24 +392,14 @@ int textbuf_split_line(TextBuffer *buf, size_t line, size_t pos)
     return 0;
 }
 
-int textbuf_load_file(TextBuffer *buf, const char *filename)
+static void textbuf_load_lines_from_file(TextBuffer *buf, FILE *fp)
 {
-    FILE *fp = NULL;
+    assert(buf != NULL);
+    assert(fp != NULL);
+
     char *line = NULL;
     size_t n = 0;
     ssize_t num_chars = 0;
-
-    assert(buf != NULL);
-    assert(filename != NULL);
-
-    fp = fopen(filename, "r");
-    if (!fp) {
-        fprintf(stderr, "Couldn't open file %s for reading\n", filename);
-        return 1;
-    }
-
-    textbuf_delete_all_lines(buf);
-
     while ((num_chars = getline(&line, &n, fp)) != -1) {
         char *newline;
         if ((newline = strchr(line, '\n'))) {
@@ -421,6 +411,21 @@ int textbuf_load_file(TextBuffer *buf, const char *filename)
         n = 0;
     }
     free(line);
+}
+
+int textbuf_load_file(TextBuffer *buf, const char *filename)
+{
+    assert(buf != NULL);
+    assert(filename != NULL);
+
+    FILE *fp = fopen(filename, "r");
+    if (!fp) {
+        fprintf(stderr, "Couldn't open file %s for reading\n", filename);
+        return 1;
+    }
+
+    textbuf_delete_all_lines(buf);
+    textbuf_load_lines_from_file(buf, fp);
 
     fclose(fp);
     return 0;

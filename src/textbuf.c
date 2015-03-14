@@ -161,19 +161,30 @@ TextBuffer *textbuf_init(void)
     return buf;
 }
 
-void textbuf_free(TextBuffer *buf)
+static void textbuf_delete_all_lines(TextBuffer *buf)
 {
-    TextLine *tmp;
-    if (!buf) {
-        return;
-    }
+    assert(buf != NULL);
 
-    tmp = buf->head;
+    TextLine *tmp = buf->head;
+
     while (tmp) {
         TextLine *next = tmp->next;
         textline_free(tmp);
         tmp = next;
     }
+
+    buf->head = NULL;
+    buf->tail = NULL;
+    buf->num_lines = 0;
+}
+
+void textbuf_free(TextBuffer *buf)
+{
+    if (!buf) {
+        return;
+    }
+
+    textbuf_delete_all_lines(buf);
 
     free(buf);
 }
@@ -387,7 +398,6 @@ int textbuf_load_file(TextBuffer *buf, const char *filename)
     char *line = NULL;
     size_t n = 0;
     ssize_t num_chars = 0;
-    TextLine *tmp;
 
     assert(buf != NULL);
     assert(filename != NULL);
@@ -398,15 +408,7 @@ int textbuf_load_file(TextBuffer *buf, const char *filename)
         return 1;
     }
 
-    tmp = buf->head;
-    while (tmp) {
-        TextLine *next = tmp->next;
-        textline_free(tmp);
-        tmp = next;
-    }
-    buf->head = NULL;
-    buf->tail = NULL;
-    buf->num_lines = 0;
+    textbuf_delete_all_lines(buf);
 
     while ((num_chars = getline(&line, &n, fp)) != -1) {
         char *newline;

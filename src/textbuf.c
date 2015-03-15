@@ -63,30 +63,27 @@ void textline_free(TextLine *line)
     free(line);
 }
 
-int textline_insert(TextLine *line, const char *text, size_t pos)
+/* Adds text to end of line */
+static void textline_append(TextLine *line, const char *text)
 {
     size_t num_bytes = strlen(text);
     size_t new_size = line->num_bytes + num_bytes + 1;
-    size_t u8pos;
-    char *tmp;
-
-    if (pos == line->num_chars) {
-        if (line->textbuf_size < new_size) {
-            while (line->textbuf_size < new_size) {
-                line->textbuf_size *= 2;
-            }
-            line->text = realloc(line->text, line->textbuf_size);
+    if (line->textbuf_size < new_size) {
+        while (line->textbuf_size < new_size) {
+            line->textbuf_size *= 2;
         }
-        strcat(line->text, text);
-        goto update_size;
+        line->text = realloc(line->text, line->textbuf_size);
     }
+    strcat(line->text, text);
+}
 
-    if (u8_find_pos(line->text, pos, &u8pos)) {
-        return 1;
-    }
+/* Inserts text in middle of line. Returns 0 on success */
+static int textline_insert_in_middle(TextLine *line, const char *text,
+                                      size_t pos)
+{
 
-    tmp = malloc(line->num_bytes - u8pos + 1);
-
+    size_t num_bytes = strlen(text);
+    size_t new_size = line->num_bytes + num_bytes + 1;
     if (line->textbuf_size < new_size) {
         while (line->textbuf_size < new_size) {
             line->textbuf_size *= 2;
@@ -94,12 +91,32 @@ int textline_insert(TextLine *line, const char *text, size_t pos)
         line->text = realloc(line->text, line->textbuf_size);
     }
 
+    size_t u8pos;
+    if (u8_find_pos(line->text, pos, &u8pos)) {
+        return 1;
+    }
+    char *tmp = malloc(line->num_bytes - u8pos + 1);
+
     strcpy(tmp, line->text + u8pos);
     strcpy(line->text + u8pos, text);
     strcat(line->text, tmp);
     free(tmp);
-update_size:
-    line->num_bytes = new_size - 1; /* don't count the '\0' */
+    return 0;
+}
+
+int textline_insert(TextLine *line, const char *text, size_t pos)
+{
+
+    if (pos == line->num_chars) {
+        textline_append(line, text);
+    } else {
+        int err = textline_insert_in_middle(line, text, pos);
+        if (err) {
+            return 1;
+        }
+    }
+
+    line->num_bytes = strlen(line->text);
     line->num_chars = u8strlen(line->text);
 
     return 0;
